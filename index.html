@@ -41,7 +41,6 @@
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
       user-select: none;
     }
 
@@ -284,8 +283,6 @@
     #puzzle-canvas {
       touch-action: none;
       display: block;
-      width: 100%;
-      height: 100%;
     }
   </style>
 </head>
@@ -334,7 +331,6 @@
              role="button"
              tabindex="0"
              aria-label="สแกนลายนิ้วมือ"
-             style="touch-action: none;"
              class="relative w-40 h-40 rounded-full bg-white shadow-[0_14px_35px_rgba(244,91,137,0.22)] flex items-center justify-center cursor-pointer transition-transform duration-200 active:scale-95">
           
           <!-- Circular SVG Progress Ring -->
@@ -388,35 +384,6 @@
       <div class="flex items-center gap-2 opacity-60">
         <span class="w-2 h-2 rounded-full bg-blush-400"></span>
         <span class="w-2 h-2 rounded-full bg-blush-200"></span>
-        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
-      </div>
-    </section>
-
-
-    <!-- ========================================================= -->
-    <!-- STEP 2: INTERLOCKING JIGSAW PUZZLE (3x3)                  -->
-    <!-- ========================================================= -->
-    <section id="stage-2" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-3 pt-6 pb-4 text-center">
-      
-      <!-- Minimal Top Prompt & Counter -->
-      <div class="flex items-center justify-center gap-2 shrink-0 mb-1">
-        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/90 text-blush-500 text-xs font-medium shadow-sm">
-          <span id="puzzle-header-text">ลากชิ้นส่วนมาต่อให้ครบนะ ✨</span>
-        </span>
-        <span id="puzzle-counter" class="inline-flex items-center px-2.5 py-1 rounded-full bg-blush-100/90 text-blush-600 text-xs font-semibold shadow-sm">
-          0/9
-        </span>
-      </div>
-
-      <!-- Full Interactive Puzzle Play Area (Board + Scattered Pieces Tray) -->
-      <div id="puzzle-stage-area" class="relative w-full flex-1 min-h-0 overflow-hidden">
-        <canvas id="puzzle-canvas"></canvas>
-      </div>
-
-      <!-- Bottom Cute Minimal Visual Dots -->
-      <div class="flex items-center gap-2 opacity-60 shrink-0 pt-1">
-        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
-        <span class="w-2 h-2 rounded-full bg-blush-400"></span>
         <span class="w-2 h-2 rounded-full bg-blush-200"></span>
       </div>
     </section>
@@ -547,15 +514,6 @@
      */
     const CUSTOM_IMAGE_URL = "";
 
-    /**
-     * =========================================================================
-     * OPTIONAL: แก้ไขข้อความอวยพรในจดหมายวันพ่อตรงนี้ได้ตามต้องการ
-     * =========================================================================
-     */
-    const LETTER_MESSAGE = `ขอบคุณพ่อที่คอยดูแลและเป็นกำลังใจให้หนูเสมอ<br/>ขอให้พ่อสุขภาพแข็งแรง ยิ้มเยอะๆ<br/>อยู่เป็นความสุขของหนูไปนานๆ นะคะ`;
-
-    document.getElementById('letter-message-body').innerHTML = LETTER_MESSAGE;
-
     // --- Soft Cute Sound Effects via Web Audio API (No external files needed) ---
     let audioCtx = null;
     function playCuteSound(type = 'snap') {
@@ -619,7 +577,6 @@
     const puzzleStageArea = document.getElementById('puzzle-stage-area');
     const puzzleCanvas = document.getElementById('puzzle-canvas');
     const puzzleHeaderText = document.getElementById('puzzle-header-text');
-    const puzzleCounter = document.getElementById('puzzle-counter');
 
     // --- Step 3 & 4 Elements ---
     const envelopeBox = document.getElementById('envelope-box');
@@ -744,7 +701,7 @@
     }
 
     function beginHold(e) {
-      if (e && e.cancelable) e.preventDefault();
+      if (e) e.preventDefault();
       if (isUnlocked) return;
       isHolding = true;
       scannerPad.classList.add('scanning');
@@ -754,6 +711,7 @@
     }
 
     function endHold(e) {
+      if (e) e.preventDefault();
       if (isUnlocked) return;
       isHolding = false;
       scannerPad.classList.remove('scanning');
@@ -762,9 +720,10 @@
       rafId = requestAnimationFrame(stepScan);
     }
 
-    scannerPad.addEventListener('pointerdown', beginHold);
-    window.addEventListener('pointerup', endHold);
-    window.addEventListener('pointercancel', endHold);
+    scannerPad.addEventListener('mousedown', beginHold);
+    scannerPad.addEventListener('touchstart', beginHold, { passive: false });
+    window.addEventListener('mouseup', endHold);
+    window.addEventListener('touchend', endHold);
     scannerPad.addEventListener('contextmenu', (e) => e.preventDefault());
 
 
@@ -1108,11 +1067,9 @@
 
     function resizeAndLayoutPuzzle() {
       const rect = puzzleStageArea.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      puzzleCanvas.width = Math.round(rect.width * dpr);
-      puzzleCanvas.height = Math.round(rect.height * dpr);
+      puzzleCanvas.width = rect.width * dpr;
+      puzzleCanvas.height = rect.height * dpr;
 
       const ctx = puzzleCanvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1120,11 +1077,11 @@
       const W = rect.width;
       const H = rect.height;
 
-      // Board size fits cleanly in top 56% of stage area
-      const boardSize = Math.min(W * 0.78, H * 0.52);
+      // Board size fits cleanly in top 58% of stage area
+      const boardSize = Math.min(W * 0.80, H * 0.54);
       const cellSize = boardSize / GRID;
       const boardX = (W - boardSize) / 2;
-      const boardY = Math.max(10, H * 0.03);
+      const boardY = Math.max(12, H * 0.04);
 
       const prevCell = boardRect.cellSize || cellSize;
       boardRect = { x: boardX, y: boardY, size: boardSize, cellSize };
@@ -1133,15 +1090,14 @@
         buildPuzzlePieces(W, H);
         puzzleInitialized = true;
       } else {
-        // Re-sync snapped pieces to new board coordinates & clamp floating pieces inside bounds
+        // Re-sync snapped pieces to new board coordinates
         pieces.forEach((p) => {
           if (p.snapped) {
             p.x = boardRect.x + (p.col + 0.5) * boardRect.cellSize;
             p.y = boardRect.y + (p.row + 0.5) * boardRect.cellSize;
           } else {
-            const pad = cellSize * 0.45;
-            p.x = Math.min(W - pad, Math.max(pad, p.x * (cellSize / prevCell)));
-            p.y = Math.min(H - pad, Math.max(boardY + boardSize + pad, p.y));
+            p.x = Math.min(W - cellSize * 0.5, Math.max(cellSize * 0.5, p.x * (cellSize / prevCell)));
+            p.y = Math.min(H - cellSize * 0.5, Math.max(boardY + boardSize + cellSize * 0.45, p.y));
           }
         });
       }
@@ -1290,22 +1246,39 @@
           srcY - margin * imgScale,
           (cellSize + margin * 2) * imgScale,
           (cellSize + margin * 2) * imgScale,
-    // Pointer Interaction (Unified Pointer Events for Touch & Mouse)
-    let activePointerId = null;
+          -cellSize / 2 - margin,
+          -cellSize / 2 - margin,
+          cellSize + margin * 2,
+          cellSize + margin * 2
+        );
+        ctx.restore();
 
+        // Subtle Glossy Highlight Bevel along Curved Edge
+        ctx.strokeStyle = p.snapped
+          ? 'rgba(255, 255, 255, 0.45)'
+          : 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = p.snapped ? 1.2 : 2;
+        ctx.stroke();
+
+        ctx.restore();
+      });
+    }
+
+    // Pointer Interaction (Touch & Mouse Drag-and-Drop)
     function getPointerPos(e) {
       const rect = puzzleCanvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: clientX - rect.left,
+        y: clientY - rect.top,
       };
     }
 
     function onPuzzlePointerDown(e) {
       if (puzzleCompleted) return;
-      e.preventDefault();
       const pos = getPointerPos(e);
-      const hitRadius = boardRect.cellSize * 0.60;
+      const hitRadius = boardRect.cellSize * 0.56;
 
       // Search in reverse order so top-most piece is picked first
       for (let i = pieces.length - 1; i >= 0; i--) {
@@ -1314,11 +1287,7 @@
         const dist = Math.hypot(pos.x - p.x, pos.y - p.y);
         if (dist <= hitRadius) {
           activePiece = p;
-          activePointerId = e.pointerId;
-          if (puzzleCanvas.setPointerCapture) {
-            try { puzzleCanvas.setPointerCapture(e.pointerId); } catch (_) {}
-          }
-          activePiece.scale = 1.06; // Pop up while dragging
+          activePiece.scale = 1.04; // Pop up to full board scale while dragging
           dragOffset.x = pos.x - p.x;
           dragOffset.y = pos.y - p.y;
           drawPuzzleScene();
@@ -1329,44 +1298,35 @@
 
     function onPuzzlePointerMove(e) {
       if (!activePiece || puzzleCompleted) return;
-      if (activePointerId !== null && e.pointerId !== activePointerId) return;
       e.preventDefault();
-
-      const rect = puzzleCanvas.getBoundingClientRect();
       const pos = getPointerPos(e);
-      const pad = boardRect.cellSize * 0.38;
-
-      // Clamp position so piece never leaves visible screen bounds
-      activePiece.x = Math.min(rect.width - pad, Math.max(pad, pos.x - dragOffset.x));
-      activePiece.y = Math.min(rect.height - pad, Math.max(pad, pos.y - dragOffset.y));
+      activePiece.x = pos.x - dragOffset.x;
+      activePiece.y = pos.y - dragOffset.y;
 
       // Magnetic Snap Check while Dragging Near Target Slot
       const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellSize;
       const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellSize;
       const dist = Math.hypot(activePiece.x - targetX, activePiece.y - targetY);
 
-      if (dist < boardRect.cellSize * 0.36) {
+      if (dist < boardRect.cellSize * 0.34) {
         snapPieceIntoSlot(activePiece, targetX, targetY);
       } else {
         drawPuzzleScene();
       }
     }
 
-    function onPuzzlePointerUp(e) {
+    function onPuzzlePointerUp() {
       if (!activePiece || puzzleCompleted) return;
-      if (activePointerId !== null && e.pointerId !== activePointerId) return;
-
       const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellSize;
       const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellSize;
       const dist = Math.hypot(activePiece.x - targetX, activePiece.y - targetY);
 
-      if (dist < boardRect.cellSize * 0.45) {
+      if (dist < boardRect.cellSize * 0.42) {
         snapPieceIntoSlot(activePiece, targetX, targetY);
       } else {
         // Gently return to tray scale if dropped outside
         activePiece.scale = 0.78;
         activePiece = null;
-        activePointerId = null;
         drawPuzzleScene();
       }
     }
@@ -1377,11 +1337,7 @@
       piece.scale = 1.0;
       piece.snapped = true;
       activePiece = null;
-      activePointerId = null;
       playCuteSound('snap');
-
-      const snappedCount = pieces.filter((p) => p.snapped).length;
-      puzzleCounter.textContent = `${snappedCount}/9`;
 
       // Cute sparkle pop at snapped location
       const pop = document.createElement('span');
@@ -1421,16 +1377,16 @@
       showCompletedFullImage = false;
       puzzleInitialized = false;
       activePiece = null;
-      activePointerId = null;
-      puzzleHeaderText.textContent = 'ลากชิ้นส่วนมาต่อให้ครบนะ ✨';
-      puzzleCounter.textContent = '0/9';
-      requestAnimationFrame(() => resizeAndLayoutPuzzle());
+      puzzleHeaderText.textContent = 'ต่อภาพความทรงจำ';
+      resizeAndLayoutPuzzle();
     }
 
-    puzzleCanvas.addEventListener('pointerdown', onPuzzlePointerDown);
-    puzzleCanvas.addEventListener('pointermove', onPuzzlePointerMove);
-    puzzleCanvas.addEventListener('pointerup', onPuzzlePointerUp);
-    puzzleCanvas.addEventListener('pointercancel', onPuzzlePointerUp);
+    puzzleCanvas.addEventListener('mousedown', onPuzzlePointerDown);
+    puzzleCanvas.addEventListener('touchstart', onPuzzlePointerDown, { passive: false });
+    window.addEventListener('mousemove', onPuzzlePointerMove, { passive: false });
+    window.addEventListener('touchmove', onPuzzlePointerMove, { passive: false });
+    window.addEventListener('mouseup', onPuzzlePointerUp);
+    window.addEventListener('touchend', onPuzzlePointerUp);
     window.addEventListener('resize', () => {
       if (stage2.classList.contains('stage-active')) {
         resizeAndLayoutPuzzle();
