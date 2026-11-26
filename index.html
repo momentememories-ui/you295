@@ -302,7 +302,7 @@
 </head>
 <body>
 
-  <!-- Background Music (Starts when entering Stage 2 after unlock sound) -->
+  <!-- Background Music (Auto-starts when Stage 2 opens after fingerprint scan) -->
   <audio id="bg-music" loop preload="auto" playsinline>
     <source src="song.mp3" type="audio/mpeg" />
   </audio>
@@ -489,7 +489,7 @@
             ขอบคุณพ่อที่คอยดูแล<br/>
             และเป็นกำลังใจให้หนูเสมอมา<br/>
             ขอให้พ่อสุขภาพแข็งแรง มีความสุขมากๆ<br/>
-            อยู่เป็นรอยย้มของหนูไปนานๆ นะคะ
+            อยู่เป็นรอยยิ้มของหนูไปนานๆ นะคะ
           </p>
 
           <div class="mt-6 pt-3 border-t border-blush-200/60 w-full flex flex-col items-center">
@@ -510,7 +510,7 @@
     const musicToggleBtn = document.getElementById('music-toggle-btn');
 
     // =========================================================================
-    // HAPTIC VIBRATION HELPER (Android Chrome supports; iOS Safari ignores API)
+    // HAPTIC VIBRATION HELPER
     // =========================================================================
     function vibratePulse(pattern) {
       try {
@@ -521,170 +521,163 @@
     }
 
     // =========================================================================
-    // SYNCHRONOUS WEB AUDIO UNLOCK & SOUND ENGINE (Works reliably on Mobile)
+    // CUTE SOUND EFFECTS ENGINE (Reliable Web Audio API + HTML5 Audio Fallback)
     // =========================================================================
     let audioCtx = null;
 
-    function unlockWebAudioSync() {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return null;
+    function primeAudioContext() {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
       if (!audioCtx) {
-        audioCtx = new AudioCtx();
+        audioCtx = new Ctx();
       }
       if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().catch(() => {});
       }
-      // Play 1-sample silent buffer synchronously inside user gesture to force iOS/Android unlock
       try {
-        const silentBuf = audioCtx.createBuffer(1, 1, 22050);
+        const buf = audioCtx.createBuffer(1, 1, 22050);
         const src = audioCtx.createBufferSource();
-        src.buffer = silentBuf;
+        src.buffer = buf;
         src.connect(audioCtx.destination);
         src.start(0);
       } catch (_) {}
       return audioCtx;
     }
 
-    function playToneSync(freq, type = 'sine', duration = 0.14, gainVal = 0.32, delay = 0) {
-      const ctx = unlockWebAudioSync();
+    // Prime Web Audio on any first interaction
+    window.addEventListener('pointerdown', primeAudioContext, { passive: true });
+    window.addEventListener('touchstart', primeAudioContext, { passive: true });
+    window.addEventListener('mousedown', primeAudioContext, { passive: true });
+
+    function playCuteNote(freq, duration = 0.16, type = 'sine', volume = 0.24, delay = 0, slideToFreq = null) {
+      const ctx = primeAudioContext();
       if (!ctx) return;
-      const now = ctx.currentTime + delay;
+
+      const startAt = ctx.currentTime + delay;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
+
       osc.type = type;
-      osc.frequency.setValueAtTime(freq, now);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(gainVal, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + duration + 0.02);
-    }
-
-    // Crisp mechanical/tap click sound (used for puzzle pieces)
-    function playTapClickSync(pitch = 620, gainVal = 0.28) {
-      const ctx = unlockWebAudioSync();
-      if (!ctx) return;
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(pitch, now);
-      osc.frequency.exponentialRampToValueAtTime(pitch * 0.45, now + 0.045);
-
-      gain.gain.setValueAtTime(gainVal, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.055);
-    }
-
-    // Pure paper crinkle & slide sound (no musical tones)
-    function playPurePaperSoundSync(duration = 0.32, gainVal = 0.42, delay = 0, centerFreq = 1800) {
-      const ctx = unlockWebAudioSync();
-      if (!ctx) return;
-      const now = ctx.currentTime + delay;
-      const sampleCount = Math.max(1, Math.floor(ctx.sampleRate * duration));
-      const buffer = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-
-      // Textured noise envelope to sound like real paper fibers sliding/folding
-      let lastVal = 0;
-      for (let i = 0; i < sampleCount; i++) {
-        const t = i / sampleCount;
-        const env = Math.sin(t * Math.PI) * (0.7 + 0.3 * Math.sin(t * Math.PI * 7));
-        const white = Math.random() * 2 - 1;
-        lastVal = (lastVal + 0.35 * white) / 1.35;
-        data[i] = lastVal * env;
+      osc.frequency.setValueAtTime(freq, startAt);
+      if (slideToFreq) {
+        osc.frequency.exponentialRampToValueAtTime(slideToFreq, startAt + duration);
       }
 
-      const src = ctx.createBufferSource();
-      src.buffer = buffer;
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.linearRampToValueAtTime(volume, startAt + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
 
-      const highpass = ctx.createBiquadFilter();
-      highpass.type = 'highpass';
-      highpass.frequency.setValueAtTime(650, now);
-
-      const bandpass = ctx.createBiquadFilter();
-      bandpass.type = 'bandpass';
-      bandpass.frequency.setValueAtTime(centerFreq, now);
-      bandpass.Q.setValueAtTime(0.85, now);
-
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(gainVal, now + duration * 0.18);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-      src.connect(highpass);
-      highpass.connect(bandpass);
-      bandpass.connect(gain);
+      osc.connect(gain);
       gain.connect(ctx.destination);
 
-      src.start(now);
-      src.stop(now + duration + 0.02);
+      osc.start(startAt);
+      osc.stop(startAt + duration + 0.03);
+    }
+
+    // Soft paper rustle & slide sound using Web Audio noise
+    function playCutePaperSfx(duration = 0.28, volume = 0.26, delay = 0, centerFreq = 1600) {
+      const ctx = primeAudioContext();
+      if (!ctx) return;
+
+      const startAt = ctx.currentTime + delay;
+      const frames = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+      const channel = buffer.getChannelData(0);
+
+      let prev = 0;
+      for (let i = 0; i < frames; i++) {
+        const ratio = i / frames;
+        const env = Math.sin(ratio * Math.PI);
+        const white = Math.random() * 2 - 1;
+        prev = (prev + 0.3 * white) / 1.3;
+        channel[i] = prev * env;
+      }
+
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(centerFreq, startAt);
+      filter.Q.setValueAtTime(0.9, startAt);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.linearRampToValueAtTime(volume, startAt + duration * 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      source.start(startAt);
+      source.stop(startAt + duration + 0.02);
     }
 
     const sfx = {
-      // Scanning pulse effect while holding finger
+      // Cute rising blip while holding fingerprint scan
       scanTick: (prog) => {
-        playToneSync(460 + prog * 420, 'sine', 0.085, 0.30, 0);
-        playToneSync(690 + prog * 420, 'triangle', 0.06, 0.18, 0.02);
+        const base = 480 + prog * 360;
+        playCuteNote(base, 0.11, 'sine', 0.22, 0, base * 1.18);
       },
-      // Crisp unlock click + chime when scan completes
-      unlockClick: () => {
-        playTapClickSync(920, 0.35);
-        playToneSync(880.00, 'sine', 0.13, 0.34, 0.04);
-        playToneSync(1318.5, 'triangle', 0.30, 0.34, 0.12);
+      // Cute unlock chime when scan completes
+      unlockChime: () => {
+        playCuteNote(659.25, 0.14, 'triangle', 0.26, 0.00);
+        playCuteNote(880.00, 0.16, 'sine', 0.26, 0.08);
+        playCuteNote(1174.66, 0.34, 'sine', 0.28, 0.16);
       },
-      // Simple tap/click sound when dragging/snapping puzzle pieces
-      pieceTap: () => {
-        playTapClickSync(580, 0.25);
+      // Cute soft pop/tap when picking or placing a jigsaw piece
+      piecePop: () => {
+        playCuteNote(540, 0.09, 'sine', 0.22, 0, 760);
       },
-      piecePlace: () => {
-        playTapClickSync(760, 0.30);
+      pieceSnapCute: () => {
+        playCuteNote(659.25, 0.12, 'sine', 0.24, 0);
+        playCuteNote(987.77, 0.20, 'triangle', 0.25, 0.06);
       },
-      puzzleComplete: () => {
-        playToneSync(523.25, 'sine', 0.18, 0.28, 0);
-        playToneSync(659.25, 'sine', 0.18, 0.28, 0.10);
-        playToneSync(783.99, 'sine', 0.18, 0.28, 0.20);
-        playToneSync(1046.5, 'triangle', 0.40, 0.32, 0.30);
+      // Cute celebratory chime when puzzle finishes
+      puzzleCompleteCute: () => {
+        playCuteNote(523.25, 0.16, 'sine', 0.24, 0.00);
+        playCuteNote(659.25, 0.16, 'sine', 0.24, 0.10);
+        playCuteNote(783.99, 0.16, 'sine', 0.24, 0.20);
+        playCuteNote(1046.50, 0.42, 'triangle', 0.28, 0.30);
       },
-      // Pure paper sound when opening the envelope
+      // Soft paper unfold + slide sound when opening the letter
       letterPaperOpen: () => {
-        playPurePaperSoundSync(0.24, 0.45, 0.00, 1450); // Flap crease unfold
-        playPurePaperSoundSync(0.38, 0.48, 0.18, 2250); // Paper letter sliding out
+        playCutePaperSfx(0.24, 0.28, 0.00, 1450);
+        playCutePaperSfx(0.34, 0.28, 0.18, 2100);
       }
     };
 
     // =========================================================================
-    // BACKGROUND MUSIC (Starts when entering Stage 2 after unlock)
+    // BACKGROUND MUSIC (Auto-starts when Stage 2 opens after scan completes)
     // =========================================================================
     let musicStarted = false;
 
-    function startBgMusicOnStage2() {
+    function startBgMusicAutomaticallyOnStage2() {
       if (!bgMusic || musicStarted) return;
       musicStarted = true;
       bgMusic.muted = false;
       bgMusic.currentTime = 0;
       bgMusic.volume = 0.75;
-      const p = bgMusic.play();
-      if (p && typeof p.then === 'function') {
-        p.then(() => {
+
+      const playPromise = bgMusic.play();
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(() => {
           musicToggleBtn.classList.remove('hidden');
           musicToggleBtn.classList.add('flex');
         }).catch(() => {
           musicStarted = false;
         });
+      } else {
+        musicToggleBtn.classList.remove('hidden');
+        musicToggleBtn.classList.add('flex');
       }
     }
 
     musicToggleBtn.addEventListener('click', () => {
       if (!bgMusic) return;
+      primeAudioContext();
+      sfx.piecePop();
       if (bgMusic.paused) {
         bgMusic.play();
         musicToggleBtn.textContent = '🎵';
@@ -878,7 +871,7 @@
           pulseTimer = 0;
           spawnMiniPopHeart(scannerContainer);
           sfx.scanTick(progress);
-          vibratePulse(40);
+          vibratePulse(35);
         }
         updateScannerVisuals();
 
@@ -888,15 +881,16 @@
           scannerPad.classList.remove('scanning');
           updateScannerVisuals();
 
-          sfx.unlockClick();
-          vibratePulse([60, 40, 100]);
+          sfx.unlockChime();
+          vibratePulse([50, 40, 85]);
           burstFallingHearts(20);
 
+          // Automatically transition to Stage 2 and start music without waiting for extra tap
           setTimeout(() => {
             switchStage(2);
             initJigsawPuzzle();
-            startBgMusicOnStage2();
-          }, 750);
+            startBgMusicAutomaticallyOnStage2();
+          }, 700);
           return;
         }
         rafId = requestAnimationFrame(stepScan);
@@ -917,14 +911,13 @@
       if (e && e.cancelable) e.preventDefault();
       if (isUnlocked) return;
 
-      // Unlock Web Audio + trigger immediate first scan sound & vibration inside user gesture
-      unlockWebAudioSync();
+      primeAudioContext();
       isHolding = true;
       pulseTimer = 0;
       scannerPad.classList.add('scanning');
       updateScannerVisuals();
       sfx.scanTick(progress);
-      vibratePulse([45, 140, 45, 140, 45, 140, 45, 140, 45]);
+      vibratePulse([40, 140, 40, 140, 40, 140, 40, 140, 40]);
       spawnMiniPopHeart(scannerContainer);
 
       lastTime = null;
@@ -937,14 +930,16 @@
       if (isUnlocked) return;
       isHolding = false;
       scannerPad.classList.remove('scanning');
-      vibratePulse(0); // Stop vibration immediately when finger lifts
+      vibratePulse(0);
       lastTime = null;
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(stepScan);
     }
 
+    scannerPad.addEventListener('pointerdown', beginHold);
     scannerPad.addEventListener('touchstart', beginHold, { passive: false });
     scannerPad.addEventListener('mousedown', beginHold);
+    window.addEventListener('pointerup', endHold);
     window.addEventListener('touchend', endHold);
     window.addEventListener('touchcancel', endHold);
     window.addEventListener('mouseup', endHold);
@@ -1320,8 +1315,8 @@
 
     function onPuzzlePointerDown(e) {
       if (puzzleCompleted) return;
-      unlockWebAudioSync();
-      if (isUnlocked && !musicStarted) startBgMusicOnStage2();
+      primeAudioContext();
+      if (isUnlocked && !musicStarted) startBgMusicAutomaticallyOnStage2();
       const pos = getPointerPos(e);
       const hitRadius = Math.max(boardRect.cellW, boardRect.cellH) * 0.56;
 
@@ -1334,7 +1329,7 @@
           activePiece.scale = 1.0;
           dragOffset.x = pos.x - p.x;
           dragOffset.y = pos.y - p.y;
-          sfx.pieceTap();
+          sfx.piecePop();
           vibratePulse(20);
           drawPuzzleScene();
           break;
@@ -1383,7 +1378,7 @@
       piece.scale = 1.0;
       piece.snapped = true;
       activePiece = null;
-      sfx.piecePlace();
+      sfx.pieceSnapCute();
       vibratePulse(30);
 
       const pop = document.createElement('span');
@@ -1406,7 +1401,7 @@
           showCompletedFullImage = true;
           revealZoomProgress = 0;
           puzzleHeaderText.textContent = 'รักพ่อที่สุดเลย 🩷';
-          sfx.puzzleComplete();
+          sfx.puzzleCompleteCute();
           vibratePulse([40, 35, 70]);
           burstFallingHearts(32);
           animateRevealZoomToCenter();
@@ -1429,10 +1424,13 @@
       resizeAndLayoutPuzzle();
     }
 
+    puzzleCanvas.addEventListener('pointerdown', onPuzzlePointerDown);
     puzzleCanvas.addEventListener('touchstart', onPuzzlePointerDown, { passive: false });
     puzzleCanvas.addEventListener('mousedown', onPuzzlePointerDown);
+    window.addEventListener('pointermove', onPuzzlePointerMove, { passive: false });
     window.addEventListener('touchmove', onPuzzlePointerMove, { passive: false });
     window.addEventListener('mousemove', onPuzzlePointerMove, { passive: false });
+    window.addEventListener('pointerup', onPuzzlePointerUp);
     window.addEventListener('touchend', onPuzzlePointerUp);
     window.addEventListener('mouseup', onPuzzlePointerUp);
     window.addEventListener('resize', () => {
@@ -1443,7 +1441,7 @@
 
 
     // =========================================================================
-    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> PURE PAPER SOUND + RISING EMOJIS
+    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> PAPER SOUND + RISING EMOJIS
     // =========================================================================
     let envelopeOpened = false;
 
@@ -1451,8 +1449,8 @@
       if (e && e.cancelable) e.preventDefault();
       if (envelopeOpened) return;
       envelopeOpened = true;
-      unlockWebAudioSync();
-      if (isUnlocked && !musicStarted) startBgMusicOnStage2();
+      primeAudioContext();
+      if (isUnlocked && !musicStarted) startBgMusicAutomaticallyOnStage2();
 
       envelopeBox.classList.remove('animate-duk-dik');
       envelopeBox.classList.add('env-opened');
@@ -1469,6 +1467,7 @@
       }, 950);
     }
 
+    envelopeBox.addEventListener('pointerdown', handleOpenEnvelope);
     envelopeBox.addEventListener('touchstart', handleOpenEnvelope, { passive: false });
     envelopeBox.addEventListener('click', handleOpenEnvelope);
   </script>
