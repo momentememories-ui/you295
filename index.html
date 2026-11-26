@@ -90,13 +90,13 @@
     /* Realistic Scanning Vibration */
     @keyframes scanShake {
       0% { transform: translate(0px, 0px) rotate(0deg); }
-      25% { transform: translate(-2.5px, 1.5px) rotate(-0.9deg); }
-      50% { transform: translate(2.5px, -1.5px) rotate(0.9deg); }
-      75% { transform: translate(-1.5px, -1px) rotate(-0.5deg); }
+      25% { transform: translate(-3px, 2px) rotate(-1deg); }
+      50% { transform: translate(3px, -2px) rotate(1deg); }
+      75% { transform: translate(-2px, -1.5px) rotate(-0.6deg); }
       100% { transform: translate(0px, 0px) rotate(0deg); }
     }
     .scanning .scan-vibrate {
-      animation: scanShake 0.12s linear infinite;
+      animation: scanShake 0.11s linear infinite;
     }
 
     /* Fingerprint Scanner Laser Bar */
@@ -517,12 +517,12 @@
     // =========================================================================
     // HAPTIC VIBRATION HELPER
     // =========================================================================
-    function vibrateSoft(pattern) {
-      if (navigator && typeof navigator.vibrate === 'function') {
-        try {
+    function vibratePulse(pattern) {
+      try {
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
           navigator.vibrate(pattern);
-        } catch (_) {}
-      }
+        }
+      } catch (_) {}
     }
 
     // =========================================================================
@@ -535,7 +535,7 @@
       if (musicUnlocked || !bgMusic) return;
       bgMusic.volume = 0;
       const p = bgMusic.play();
-      if (p !== undefined) {
+      if (p && typeof p.then === 'function') {
         p.then(() => {
           if (!musicStarted) {
             bgMusic.pause();
@@ -552,12 +552,15 @@
       bgMusic.muted = false;
       bgMusic.currentTime = 0;
       bgMusic.volume = 0.75;
-      bgMusic.play().then(() => {
-        musicToggleBtn.classList.remove('hidden');
-        musicToggleBtn.classList.add('flex');
-      }).catch(() => {
-        musicStarted = false;
-      });
+      const p = bgMusic.play();
+      if (p && typeof p.then === 'function') {
+        p.then(() => {
+          musicToggleBtn.classList.remove('hidden');
+          musicToggleBtn.classList.add('flex');
+        }).catch(() => {
+          musicStarted = false;
+        });
+      }
     }
 
     musicToggleBtn.addEventListener('click', () => {
@@ -572,41 +575,57 @@
     });
 
     // =========================================================================
-    // CUTE SOUND EFFECTS ENGINE (Web Audio API)
+    // AUDIBLE SOUND EFFECTS ENGINE (Web Audio API with Guaranteed Resume)
     // =========================================================================
     let audioCtx = null;
 
-    function getAudioCtx() {
+    function ensureAudioContext() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
       if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtx = new AudioContext();
+        audioCtx = new AudioCtx();
       }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
       }
       return audioCtx;
     }
 
-    function playTone(freq, type = 'sine', duration = 0.16, gainVal = 0.09, delay = 0) {
-      const ctx = getAudioCtx();
+    // Warm up AudioContext on first user interaction anywhere in document
+    ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach((ev) => {
+      window.addEventListener(ev, () => {
+        ensureAudioContext();
+      }, { passive: true });
+    });
+
+    async function playTone(freq, type = 'sine', duration = 0.16, gainVal = 0.24, delay = 0) {
+      const ctx = ensureAudioContext();
       if (!ctx) return;
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch (_) {}
+      }
       const now = ctx.currentTime + delay;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = type;
       osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(gainVal, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + duration + 0.03);
     }
 
-    function playPaperSound(duration = 0.28, gainVal = 0.11, delay = 0, bandFreq = 1650) {
-      const ctx = getAudioCtx();
+    async function playPaperSound(duration = 0.28, gainVal = 0.26, delay = 0, bandFreq = 1650) {
+      const ctx = ensureAudioContext();
       if (!ctx) return;
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch (_) {}
+      }
       const now = ctx.currentTime + delay;
       const sampleCount = Math.max(1, Math.floor(ctx.sampleRate * duration));
       const buffer = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
@@ -625,9 +644,9 @@
       filter.Q.setValueAtTime(1.1, now);
 
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(gainVal, now + duration * 0.25);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
 
       src.connect(filter);
       filter.connect(gain);
@@ -638,32 +657,33 @@
     }
 
     const sfx = {
-      // Scanning sound effect while holding finger
-      scanLoopTick: (prog) => {
-        playTone(340 + prog * 360, 'sine', 0.08, 0.055, 0);
-        playTone(510 + prog * 360, 'triangle', 0.06, 0.025, 0.025);
+      scanTick: (prog) => {
+        playTone(440 + prog * 380, 'sine', 0.09, 0.22, 0);
+        playTone(660 + prog * 380, 'triangle', 0.07, 0.14, 0.02);
       },
-      // Crisp unlock click/chime right when scan completes
       unlockClick: () => {
-        playTone(784.0, 'triangle', 0.07, 0.14, 0.00);
-        playTone(1046.5, 'sine', 0.22, 0.12, 0.05);
+        playTone(659.25, 'triangle', 0.09, 0.28, 0.00);
+        playTone(880.00, 'sine', 0.14, 0.28, 0.07);
+        playTone(1174.66, 'sine', 0.34, 0.28, 0.15);
       },
-      piecePick: () => playTone(380, 'sine', 0.08, 0.05),
+      piecePick: () => {
+        playTone(420, 'sine', 0.09, 0.20, 0);
+      },
       pieceSnap: () => {
-        playTone(587.33, 'sine', 0.14, 0.09, 0);
-        playTone(880.00, 'sine', 0.18, 0.09, 0.06);
+        playTone(587.33, 'sine', 0.15, 0.26, 0);
+        playTone(880.00, 'triangle', 0.22, 0.26, 0.07);
       },
       puzzleComplete: () => {
-        playTone(523.25, 'sine', 0.18, 0.10, 0);
-        playTone(659.25, 'sine', 0.18, 0.10, 0.11);
-        playTone(783.99, 'sine', 0.18, 0.10, 0.22);
-        playTone(1046.5, 'sine', 0.45, 0.12, 0.33);
+        playTone(523.25, 'sine', 0.20, 0.26, 0);
+        playTone(659.25, 'sine', 0.20, 0.26, 0.11);
+        playTone(783.99, 'sine', 0.20, 0.26, 0.22);
+        playTone(1046.5, 'triangle', 0.45, 0.30, 0.33);
       },
       letterPaperOpen: () => {
-        playPaperSound(0.24, 0.12, 0.00, 1500);
-        playPaperSound(0.34, 0.13, 0.22, 2100);
-        playTone(523.25, 'sine', 0.20, 0.07, 0.14);
-        playTone(783.99, 'sine', 0.32, 0.08, 0.26);
+        playPaperSound(0.24, 0.28, 0.00, 1500);
+        playPaperSound(0.34, 0.30, 0.22, 2100);
+        playTone(523.25, 'sine', 0.20, 0.20, 0.12);
+        playTone(783.99, 'sine', 0.32, 0.22, 0.24);
       }
     };
 
@@ -717,7 +737,7 @@
     }
 
     // =========================================================================
-    // BUTTER-SMOOTH rAF EMOJI RISING ANIMATION (NO STUTTER, EXITS SCREEN)
+    // BUTTER-SMOOTH rAF EMOJI RISING ANIMATION
     // =========================================================================
     const activeRisingEmojis = [];
     let emojiRafId = null;
@@ -735,7 +755,6 @@
         item.x += Math.sin(item.age * item.swayFreq + item.phase) * item.swayAmp * dt;
         item.rot += item.rotSpeed * dt;
 
-        // Smooth fade-in at bottom, stay visible while rising, fade out smoothly near top exit
         let opacity = 1;
         if (item.age < 0.25) {
           opacity = item.age / 0.25;
@@ -746,7 +765,6 @@
         item.el.style.transform = `translate3d(${item.x.toFixed(1)}px, ${item.y.toFixed(1)}px, 0) rotate(${item.rot.toFixed(1)}deg) scale(${item.scale})`;
         item.el.style.opacity = opacity.toFixed(3);
 
-        // Remove cleanly once completely off top of screen
         if (item.y < -60) {
           item.el.remove();
           activeRisingEmojis.splice(i, 1);
@@ -781,7 +799,7 @@
             x: startX,
             y: startY,
             age: 0,
-            speedY: 135 + Math.random() * 55, // Steady smooth upward speed
+            speedY: 135 + Math.random() * 55,
             swayAmp: 18 + Math.random() * 18,
             swayFreq: 2.2 + Math.random() * 1.4,
             phase: Math.random() * Math.PI * 2,
@@ -852,8 +870,8 @@
         if (pulseTimer > 180) {
           pulseTimer = 0;
           spawnMiniPopHeart(scannerContainer);
-          sfx.scanLoopTick(progress);
-          vibrateSoft(25);
+          sfx.scanTick(progress);
+          vibratePulse(35);
         }
         updateScannerVisuals();
 
@@ -863,12 +881,10 @@
           scannerPad.classList.remove('scanning');
           updateScannerVisuals();
 
-          // 1. Unlock click sound right after scan completes
           sfx.unlockClick();
-          vibrateSoft([30, 35, 65]);
+          vibratePulse([45, 40, 90]);
           burstFallingHearts(20);
 
-          // 2. Move to Stage 2 (jigsaw) and start bgMusic there
           setTimeout(() => {
             switchStage(2);
             initJigsawPuzzle();
@@ -893,7 +909,7 @@
     function beginHold(e) {
       if (e) e.preventDefault();
       if (isUnlocked) return;
-      getAudioCtx();
+      ensureAudioContext();
       unlockBgMusicOnTouch();
       isHolding = true;
       pulseTimer = 180;
@@ -913,8 +929,10 @@
       rafId = requestAnimationFrame(stepScan);
     }
 
+    scannerPad.addEventListener('pointerdown', beginHold);
     scannerPad.addEventListener('mousedown', beginHold);
     scannerPad.addEventListener('touchstart', beginHold, { passive: false });
+    window.addEventListener('pointerup', endHold);
     window.addEventListener('mouseup', endHold);
     window.addEventListener('touchend', endHold);
     scannerPad.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -940,7 +958,7 @@
 
 
     // =========================================================================
-    // SEAMLESS INTERLOCKING JIGSAW PUZZLE ENGINE
+    // SEAMLESS INTERLOCKING JIGSAW PUZZLE + CENTER ZOOM REVEAL
     // =========================================================================
     const GRID = 3;
     const TAB_RATIO = 0.21;
@@ -954,6 +972,8 @@
     let dragOffset = { x: 0, y: 0 };
     let puzzleCompleted = false;
     let showCompletedFullImage = false;
+    let revealZoomProgress = 0; // 0 -> 1 smooth center zoom on completion
+    let revealZoomRaf = null;
     let puzzleInitialized = false;
 
     function traceJigsawPiecePath(ctx, row, col, cellW, cellH) {
@@ -1036,6 +1056,20 @@
       };
     }
 
+    function computeZoomedCenterRect(W, H, aspect) {
+      const maxW = W * 0.94;
+      const maxH = H * 0.82;
+      let zW = maxW;
+      let zH = zW / aspect;
+      if (zH > maxH) {
+        zH = maxH;
+        zW = zH * aspect;
+      }
+      const zX = (W - zW) / 2;
+      const zY = (H - zH) / 2;
+      return { x: zX, y: zY, w: zW, h: zH };
+    }
+
     function resizeAndLayoutPuzzle() {
       const rect = puzzleStageArea.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1116,6 +1150,23 @@
       });
     }
 
+    function animateRevealZoomToCenter() {
+      cancelAnimationFrame(revealZoomRaf);
+      const start = performance.now();
+      const duration = 650;
+
+      function step(now) {
+        const t = Math.min(1, (now - start) / duration);
+        // Smooth ease-out cubic
+        revealZoomProgress = 1 - Math.pow(1 - t, 3);
+        drawPuzzleScene();
+        if (t < 1) {
+          revealZoomRaf = requestAnimationFrame(step);
+        }
+      }
+      revealZoomRaf = requestAnimationFrame(step);
+    }
+
     function drawPuzzleScene() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const W = puzzleCanvas.width / dpr;
@@ -1125,6 +1176,35 @@
       ctx.clearRect(0, 0, W, H);
 
       const { x: bx, y: by, w: bW, h: bH, cellW, cellH } = boardRect;
+
+      if (showCompletedFullImage) {
+        const z = computeZoomedCenterRect(W, H, photoAspect);
+        const k = revealZoomProgress;
+        const rx = bx + (z.x - bx) * k;
+        const ry = by + (z.y - by) * k;
+        const rw = bW + (z.w - bW) * k;
+        const rh = bH + (z.h - bH) * k;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(244, 91, 137, 0.24)';
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetY = 10;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(rx - 10, ry - 10, rw + 20, rh + 20, 26);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(rx, ry, rw, rh, 18);
+        ctx.clip();
+        if (originalPhoto) {
+          ctx.drawImage(originalPhoto, rx, ry, rw, rh);
+        }
+        ctx.restore();
+        return;
+      }
 
       ctx.save();
       ctx.shadowColor = 'rgba(244, 91, 137, 0.16)';
@@ -1140,18 +1220,6 @@
       ctx.beginPath();
       ctx.roundRect(bx, by, bW, bH, 16);
       ctx.fill();
-
-      if (showCompletedFullImage) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(bx, by, bW, bH, 16);
-        ctx.clip();
-        if (originalPhoto) {
-          ctx.drawImage(originalPhoto, bx, by, bW, bH);
-        }
-        ctx.restore();
-        return;
-      }
 
       for (let r = 0; r < GRID; r++) {
         for (let c = 0; c < GRID; c++) {
@@ -1230,8 +1298,8 @@
 
     function getPointerPos(e) {
       const rect = puzzleCanvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches.length ? e.touches[0].clientY : e.clientY;
       return {
         x: clientX - rect.left,
         y: clientY - rect.top,
@@ -1240,6 +1308,7 @@
 
     function onPuzzlePointerDown(e) {
       if (puzzleCompleted) return;
+      ensureAudioContext();
       if (isUnlocked && !musicStarted) startBgMusicOnStage2();
       const pos = getPointerPos(e);
       const hitRadius = Math.max(boardRect.cellW, boardRect.cellH) * 0.56;
@@ -1254,6 +1323,7 @@
           dragOffset.x = pos.x - p.x;
           dragOffset.y = pos.y - p.y;
           sfx.piecePick();
+          vibratePulse(18);
           drawPuzzleScene();
           break;
         }
@@ -1302,6 +1372,7 @@
       piece.snapped = true;
       activePiece = null;
       sfx.pieceSnap();
+      vibratePulse(30);
 
       const pop = document.createElement('span');
       pop.className = 'mini-pop-heart text-lg';
@@ -1321,14 +1392,16 @@
 
         setTimeout(() => {
           showCompletedFullImage = true;
+          revealZoomProgress = 0;
           puzzleHeaderText.textContent = 'รักพ่อที่สุดเลย 🩷';
-          drawPuzzleScene();
           sfx.puzzleComplete();
+          vibratePulse([40, 35, 70]);
           burstFallingHearts(32);
+          animateRevealZoomToCenter();
 
           setTimeout(() => {
             switchStage(3);
-          }, 2850);
+          }, 3200);
         }, 320);
       }
     }
@@ -1336,16 +1409,21 @@
     function initJigsawPuzzle() {
       puzzleCompleted = false;
       showCompletedFullImage = false;
+      revealZoomProgress = 0;
+      cancelAnimationFrame(revealZoomRaf);
       puzzleInitialized = false;
       activePiece = null;
       puzzleHeaderText.textContent = 'ต่อภาพความทรงจำ';
       resizeAndLayoutPuzzle();
     }
 
+    puzzleCanvas.addEventListener('pointerdown', onPuzzlePointerDown);
     puzzleCanvas.addEventListener('mousedown', onPuzzlePointerDown);
     puzzleCanvas.addEventListener('touchstart', onPuzzlePointerDown, { passive: false });
+    window.addEventListener('pointermove', onPuzzlePointerMove, { passive: false });
     window.addEventListener('mousemove', onPuzzlePointerMove, { passive: false });
     window.addEventListener('touchmove', onPuzzlePointerMove, { passive: false });
+    window.addEventListener('pointerup', onPuzzlePointerUp);
     window.addEventListener('mouseup', onPuzzlePointerUp);
     window.addEventListener('touchend', onPuzzlePointerUp);
     window.addEventListener('resize', () => {
@@ -1364,7 +1442,7 @@
       if (e) e.preventDefault();
       if (envelopeOpened) return;
       envelopeOpened = true;
-      getAudioCtx();
+      ensureAudioContext();
       if (isUnlocked && !musicStarted) startBgMusicOnStage2();
 
       envelopeBox.classList.remove('animate-duk-dik');
@@ -1372,7 +1450,7 @@
       envelopeHint.style.opacity = '0';
 
       sfx.letterPaperOpen();
-      vibrateSoft(25);
+      vibratePulse(35);
       launchSmoothRisingEmojis(22);
 
       setTimeout(() => {
@@ -1382,7 +1460,7 @@
       }, 950);
     }
 
-    envelopeBox.addEventListener('pointerup', handleOpenEnvelope);
+    envelopeBox.addEventListener('pointerdown', handleOpenEnvelope);
     envelopeBox.addEventListener('click', handleOpenEnvelope);
   </script>
 </body>
