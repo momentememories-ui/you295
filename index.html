@@ -521,37 +521,85 @@
     }
 
     // =========================================================================
-    // CUTE SOUND EFFECTS ENGINE (Reliable Web Audio API + HTML5 Audio Fallback)
+    // CUTE SOUND EFFECTS ENGINE (Await ctx.resume + Cached Buffer + Anti-Dup)
     // =========================================================================
     let audioCtx = null;
+    let resumePromise = null;
+    let cachedPaperBuffer = null;
+    let lastGestureTs = 0;
 
-    function primeAudioContext() {
+    function shouldIgnoreDuplicateGesture(minGapMs = 65) {
+      const now = performance.now();
+      if (now - lastGestureTs < minGapMs) return true;
+      lastGestureTs = now;
+      return false;
+    }
+
+    function createAudioContextIfNeeded() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
-      if (!audioCtx) {
+      if (!audioCtx || audioCtx.state === 'closed') {
         audioCtx = new Ctx();
+        cachedPaperBuffer = null;
       }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-      try {
-        const buf = audioCtx.createBuffer(1, 1, 22050);
-        const src = audioCtx.createBufferSource();
-        src.buffer = buf;
-        src.connect(audioCtx.destination);
-        src.start(0);
-      } catch (_) {}
       return audioCtx;
     }
 
-    // Prime Web Audio on any first interaction
-    window.addEventListener('pointerdown', primeAudioContext, { passive: true });
-    window.addEventListener('touchstart', primeAudioContext, { passive: true });
-    window.addEventListener('mousedown', primeAudioContext, { passive: true });
+    function buildPaperBuffer(ctx) {
+      if (cachedPaperBuffer && cachedPaperBuffer.sampleRate === ctx.sampleRate) {
+        return cachedPaperBuffer;
+      }
+      const duration = 0.36;
+      const frames = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+      const channel = buffer.getChannelData(0);
 
-    function playCuteNote(freq, duration = 0.16, type = 'sine', volume = 0.24, delay = 0, slideToFreq = null) {
-      const ctx = primeAudioContext();
-      if (!ctx) return;
+      let prev = 0;
+      for (let i = 0; i < frames; i++) {
+        const ratio = i / frames;
+        const env = Math.sin(ratio * Math.PI) * (0.72 + 0.28 * Math.sin(ratio * Math.PI * 6));
+        const white = Math.random() * 2 - 1;
+        prev = (prev + 0.32 * white) / 1.32;
+        channel[i] = prev * env;
+      }
+      cachedPaperBuffer = buffer;
+      return cachedPaperBuffer;
+    }
+
+    async function ensureReadyAudioContext() {
+      const ctx = createAudioContextIfNeeded();
+      if (!ctx) return null;
+
+      if (ctx.state === 'suspended') {
+        if (!resumePromise) {
+          resumePromise = ctx.resume().catch(() => {}).finally(() => {
+            resumePromise = null;
+          });
+        }
+        await resumePromise;
+      }
+
+      if (ctx.state === 'running') {
+        buildPaperBuffer(ctx);
+        try {
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(ctx.destination);
+          src.start(0);
+        } catch (_) {}
+      }
+      return ctx;
+    }
+
+    // Single lightweight primer on first user gesture
+    window.addEventListener('pointerdown', () => {
+      ensureReadyAudioContext();
+    }, { passive: true });
+
+    async function playCuteNote(freq, duration = 0.16, type = 'sine', volume = 0.24, delay = 0, slideToFreq = null) {
+      const ctx = await ensureReadyAudioContext();
+      if (!ctx || ctx.state !== 'running') return;
 
       const startAt = ctx.currentTime + delay;
       const osc = ctx.createOscillator();
@@ -574,24 +622,12 @@
       osc.stop(startAt + duration + 0.03);
     }
 
-    // Soft paper rustle & slide sound using Web Audio noise
-    function playCutePaperSfx(duration = 0.28, volume = 0.26, delay = 0, centerFreq = 1600) {
-      const ctx = primeAudioContext();
-      if (!ctx) return;
+    async function playCutePaperSfx(duration = 0.28, volume = 0.28, delay = 0, centerFreq = 1600) {
+      const ctx = await ensureReadyAudioContext();
+      if (!ctx || ctx.state !== 'running') return;
 
+      const buffer = buildPaperBuffer(ctx);
       const startAt = ctx.currentTime + delay;
-      const frames = Math.max(1, Math.floor(ctx.sampleRate * duration));
-      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
-      const channel = buffer.getChannelData(0);
-
-      let prev = 0;
-      for (let i = 0; i < frames; i++) {
-        const ratio = i / frames;
-        const env = Math.sin(ratio * Math.PI);
-        const white = Math.random() * 2 - 1;
-        prev = (prev + 0.3 * white) / 1.3;
-        channel[i] = prev * env;
-      }
 
       const source = ctx.createBufferSource();
       source.buffer = buffer;
@@ -610,23 +646,19 @@
       filter.connect(gain);
       gain.connect(ctx.destination);
 
-      source.start(startAt);
-      source.stop(startAt + duration + 0.02);
+      source.start(startAt, 0, duration);
     }
 
     const sfx = {
-      // Cute rising blip while holding fingerprint scan
       scanTick: (prog) => {
         const base = 480 + prog * 360;
         playCuteNote(base, 0.11, 'sine', 0.22, 0, base * 1.18);
       },
-      // Cute unlock chime when scan completes
       unlockChime: () => {
         playCuteNote(659.25, 0.14, 'triangle', 0.26, 0.00);
         playCuteNote(880.00, 0.16, 'sine', 0.26, 0.08);
         playCuteNote(1174.66, 0.34, 'sine', 0.28, 0.16);
       },
-      // Cute soft pop/tap when picking or placing a jigsaw piece
       piecePop: () => {
         playCuteNote(540, 0.09, 'sine', 0.22, 0, 760);
       },
@@ -634,14 +666,12 @@
         playCuteNote(659.25, 0.12, 'sine', 0.24, 0);
         playCuteNote(987.77, 0.20, 'triangle', 0.25, 0.06);
       },
-      // Cute celebratory chime when puzzle finishes
       puzzleCompleteCute: () => {
         playCuteNote(523.25, 0.16, 'sine', 0.24, 0.00);
         playCuteNote(659.25, 0.16, 'sine', 0.24, 0.10);
         playCuteNote(783.99, 0.16, 'sine', 0.24, 0.20);
         playCuteNote(1046.50, 0.42, 'triangle', 0.28, 0.30);
       },
-      // Soft paper unfold + slide sound when opening the letter
       letterPaperOpen: () => {
         playCutePaperSfx(0.24, 0.28, 0.00, 1450);
         playCutePaperSfx(0.34, 0.28, 0.18, 2100);
@@ -674,9 +704,9 @@
       }
     }
 
-    musicToggleBtn.addEventListener('click', () => {
+    musicToggleBtn.addEventListener('click', async () => {
       if (!bgMusic) return;
-      primeAudioContext();
+      await ensureReadyAudioContext();
       sfx.piecePop();
       if (bgMusic.paused) {
         bgMusic.play();
@@ -885,7 +915,6 @@
           vibratePulse([50, 40, 85]);
           burstFallingHearts(20);
 
-          // Automatically transition to Stage 2 and start music without waiting for extra tap
           setTimeout(() => {
             switchStage(2);
             initJigsawPuzzle();
@@ -907,11 +936,11 @@
       }
     }
 
-    function beginHold(e) {
+    async function beginHold(e) {
       if (e && e.cancelable) e.preventDefault();
-      if (isUnlocked) return;
+      if (isUnlocked || shouldIgnoreDuplicateGesture()) return;
 
-      primeAudioContext();
+      await ensureReadyAudioContext();
       isHolding = true;
       pulseTimer = 0;
       scannerPad.classList.add('scanning');
@@ -927,7 +956,7 @@
 
     function endHold(e) {
       if (e && e.cancelable) e.preventDefault();
-      if (isUnlocked) return;
+      if (isUnlocked || !isHolding) return;
       isHolding = false;
       scannerPad.classList.remove('scanning');
       vibratePulse(0);
@@ -937,12 +966,8 @@
     }
 
     scannerPad.addEventListener('pointerdown', beginHold);
-    scannerPad.addEventListener('touchstart', beginHold, { passive: false });
-    scannerPad.addEventListener('mousedown', beginHold);
     window.addEventListener('pointerup', endHold);
-    window.addEventListener('touchend', endHold);
-    window.addEventListener('touchcancel', endHold);
-    window.addEventListener('mouseup', endHold);
+    window.addEventListener('pointercancel', endHold);
     scannerPad.addEventListener('contextmenu', (e) => e.preventDefault());
 
 
@@ -1305,17 +1330,15 @@
 
     function getPointerPos(e) {
       const rect = puzzleCanvas.getBoundingClientRect();
-      const clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches && e.touches.length ? e.touches[0].clientY : e.clientY;
       return {
-        x: clientX - rect.left,
-        y: clientY - rect.top,
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
       };
     }
 
-    function onPuzzlePointerDown(e) {
-      if (puzzleCompleted) return;
-      primeAudioContext();
+    async function onPuzzlePointerDown(e) {
+      if (puzzleCompleted || shouldIgnoreDuplicateGesture(40)) return;
+      await ensureReadyAudioContext();
       if (isUnlocked && !musicStarted) startBgMusicAutomaticallyOnStage2();
       const pos = getPointerPos(e);
       const hitRadius = Math.max(boardRect.cellW, boardRect.cellH) * 0.56;
@@ -1425,14 +1448,9 @@
     }
 
     puzzleCanvas.addEventListener('pointerdown', onPuzzlePointerDown);
-    puzzleCanvas.addEventListener('touchstart', onPuzzlePointerDown, { passive: false });
-    puzzleCanvas.addEventListener('mousedown', onPuzzlePointerDown);
     window.addEventListener('pointermove', onPuzzlePointerMove, { passive: false });
-    window.addEventListener('touchmove', onPuzzlePointerMove, { passive: false });
-    window.addEventListener('mousemove', onPuzzlePointerMove, { passive: false });
     window.addEventListener('pointerup', onPuzzlePointerUp);
-    window.addEventListener('touchend', onPuzzlePointerUp);
-    window.addEventListener('mouseup', onPuzzlePointerUp);
+    window.addEventListener('pointercancel', onPuzzlePointerUp);
     window.addEventListener('resize', () => {
       if (stage2.classList.contains('stage-active')) {
         resizeAndLayoutPuzzle();
@@ -1445,11 +1463,12 @@
     // =========================================================================
     let envelopeOpened = false;
 
-    function handleOpenEnvelope(e) {
+    async function handleOpenEnvelope(e) {
       if (e && e.cancelable) e.preventDefault();
-      if (envelopeOpened) return;
+      if (envelopeOpened || shouldIgnoreDuplicateGesture(80)) return;
       envelopeOpened = true;
-      primeAudioContext();
+
+      await ensureReadyAudioContext();
       if (isUnlocked && !musicStarted) startBgMusicAutomaticallyOnStage2();
 
       envelopeBox.classList.remove('animate-duk-dik');
@@ -1468,8 +1487,6 @@
     }
 
     envelopeBox.addEventListener('pointerdown', handleOpenEnvelope);
-    envelopeBox.addEventListener('touchstart', handleOpenEnvelope, { passive: false });
-    envelopeBox.addEventListener('click', handleOpenEnvelope);
   </script>
 </body>
 </html>
