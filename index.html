@@ -87,6 +87,18 @@
       animation: floatSoft 4.2s ease-in-out infinite;
     }
 
+    /* Gentle Vibrating Shake While Scanning */
+    @keyframes scanShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-2px, 1px) rotate(-0.8deg); }
+      40% { transform: translate(2px, -1px) rotate(0.8deg); }
+      60% { transform: translate(-1.5px, -1px) rotate(-0.5deg); }
+      80% { transform: translate(1.5px, 1px) rotate(0.5deg); }
+    }
+    .scanning .scan-vibrate {
+      animation: scanShake 0.16s linear infinite;
+    }
+
     /* Fingerprint Scanner Laser Bar */
     @keyframes pinkLaser {
       0% { top: 14%; opacity: 0.25; }
@@ -235,27 +247,31 @@
       background: linear-gradient(180deg, #FFFFFF 0%, #FFF6F9 60%, #FFECF2 100%);
     }
 
-    /* Floating Emojis Rising Up When Letter Opens */
-    @keyframes riseEmojiPop {
+    /* Slow, Gentle Floating Emojis Rising Up From Screen When Letter Opens */
+    @keyframes slowRiseEmoji {
       0% {
-        transform: translateY(20px) translateX(0) scale(0.4) rotate(-10deg);
+        transform: translateY(45px) translateX(0) scale(0.75) rotate(-6deg);
         opacity: 0;
       }
-      20% {
-        opacity: 1;
-        transform: translateY(-10px) translateX(var(--drift-x, 0px)) scale(1.1) rotate(6deg);
+      18% {
+        opacity: 0.95;
+        transform: translateY(5px) translateX(calc(var(--drift-x, 0px) * 0.25)) scale(1) rotate(0deg);
+      }
+      60% {
+        opacity: 0.85;
+        transform: translateY(-135px) translateX(calc(var(--drift-x, 0px) * 0.7)) scale(1.03) rotate(5deg);
       }
       100% {
-        transform: translateY(-220px) translateX(var(--drift-x, 0px)) scale(0.95) rotate(16deg);
+        transform: translateY(-270px) translateX(var(--drift-x, 0px)) scale(0.95) rotate(10deg);
         opacity: 0;
       }
     }
     .letter-rising-emoji {
       position: fixed;
-      bottom: 18%;
+      bottom: 6%;
       pointer-events: none;
       z-index: 95;
-      animation: riseEmojiPop var(--dur, 2.2s) cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+      animation: slowRiseEmoji var(--dur, 3.6s) ease-out forwards;
     }
 
     /* Floating Hearts & Sparkles Confetti */
@@ -354,7 +370,7 @@
              role="button"
              tabindex="0"
              aria-label="สแกนลายนิ้วมือ"
-             class="relative w-40 h-40 rounded-full bg-white shadow-[0_14px_35px_rgba(244,91,137,0.22)] flex items-center justify-center cursor-pointer transition-transform duration-200 active:scale-95">
+             class="scan-vibrate relative w-40 h-40 rounded-full bg-white shadow-[0_14px_35px_rgba(244,91,137,0.22)] flex items-center justify-center cursor-pointer transition-transform duration-200 active:scale-95">
           
           <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="53" fill="none" stroke="#FFE4EC" stroke-width="6.5" />
@@ -516,6 +532,17 @@
     const musicToggleBtn = document.getElementById('music-toggle-btn');
 
     // =========================================================================
+    // HAPTIC VIBRATION HELPER (Safe on unsupported browsers)
+    // =========================================================================
+    function vibrateSoft(pattern) {
+      if (navigator && typeof navigator.vibrate === 'function') {
+        try {
+          navigator.vibrate(pattern);
+        } catch (_) {}
+      }
+    }
+
+    // =========================================================================
     // MOBILE AUDIO UNLOCK & BACKGROUND MUSIC
     // =========================================================================
     let musicUnlocked = false;
@@ -561,7 +588,7 @@
     });
 
     // =========================================================================
-    // CUTE SOFT SOUND EFFECTS ENGINE (Web Audio API)
+    // CUTE SOUND EFFECTS ENGINE (Web Audio API: Scan, Unlock, Paper & Chimes)
     // =========================================================================
     let audioCtx = null;
 
@@ -593,13 +620,52 @@
       osc.stop(now + duration + 0.03);
     }
 
+    // Soft filtered noise burst to simulate paper rustle / slide
+    function playPaperSound(duration = 0.28, gainVal = 0.11, delay = 0, bandFreq = 1650) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime + delay;
+      const sampleCount = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      const buffer = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < sampleCount; i++) {
+        // Gentle envelope inside paper sound
+        const env = Math.sin((i / sampleCount) * Math.PI);
+        data[i] = (Math.random() * 2 - 1) * env;
+      }
+
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(bandFreq, now);
+      filter.Q.setValueAtTime(1.1, now);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(gainVal, now + duration * 0.25);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      src.start(now);
+      src.stop(now + duration + 0.02);
+    }
+
     const sfx = {
-      scanTick: (prog) => playTone(420 + prog * 360, 'sine', 0.09, 0.045),
-      unlockChime: () => {
-        playTone(587.33, 'sine', 0.18, 0.12, 0.00);
-        playTone(783.99, 'sine', 0.18, 0.12, 0.09);
-        playTone(987.77, 'sine', 0.22, 0.13, 0.18);
-        playTone(1174.66, 'triangle', 0.45, 0.14, 0.28);
+      // Soft scanner pulse sound while holding finger
+      scanPulse: (prog) => {
+        playTone(360 + prog * 340, 'sine', 0.085, 0.055, 0);
+        playTone(540 + prog * 340, 'triangle', 0.065, 0.025, 0.03);
+      },
+      // Clear "unlock" chime right after scan completes
+      unlockSound: () => {
+        playTone(659.25, 'sine', 0.14, 0.12, 0.00);     // E5 crisp latch
+        playTone(880.00, 'sine', 0.16, 0.12, 0.09);     // A5
+        playTone(1174.66, 'triangle', 0.38, 0.13, 0.18); // D6 unlocked chime
       },
       piecePick: () => playTone(380, 'sine', 0.08, 0.05),
       pieceSnap: () => {
@@ -612,11 +678,12 @@
         playTone(783.99, 'sine', 0.18, 0.10, 0.22);
         playTone(1046.5, 'sine', 0.45, 0.12, 0.33);
       },
-      envelopeOpen: () => {
-        playTone(440, 'triangle', 0.18, 0.08, 0);
-        playTone(554.37, 'sine', 0.22, 0.09, 0.09);
-        playTone(659.25, 'sine', 0.25, 0.10, 0.18);
-        playTone(880, 'sine', 0.42, 0.11, 0.28);
+      // Soft paper unfold + paper slide sound when tapping the envelope
+      letterPaperOpen: () => {
+        playPaperSound(0.24, 0.12, 0.00, 1500);
+        playPaperSound(0.34, 0.13, 0.22, 2100);
+        playTone(523.25, 'sine', 0.20, 0.07, 0.14);
+        playTone(783.99, 'sine', 0.32, 0.08, 0.26);
       }
     };
 
@@ -655,33 +722,33 @@
       });
     }
 
-    function burstFallingHearts(count = 26) {
+    function burstFallingHearts(count = 24) {
       const icons = ['🩷', '💕', '🌸', '✨', '🤍', '💖'];
       for (let i = 0; i < count; i++) {
         const el = document.createElement('div');
         el.className = 'falling-heart text-xl';
         el.textContent = icons[Math.floor(Math.random() * icons.length)];
         el.style.left = `${Math.random() * 100}vw`;
-        el.style.animationDuration = `${1.9 + Math.random() * 1.6}s`;
+        el.style.animationDuration = `${2.1 + Math.random() * 1.6}s`;
         el.style.animationDelay = `${Math.random() * 0.35}s`;
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 4000);
+        setTimeout(() => el.remove(), 4200);
       }
     }
 
-    // Floating cute emojis rising up when opening the letter
-    function spawnLetterOpenEmojis(count = 22) {
+    // Slow, gentle emojis rising smoothly from the bottom of the screen on letter open
+    function spawnSlowRisingEmojis(count = 20) {
       const emojis = ['🩷', '🥰', '✨', '🌸', '💕', '🫶', '💖', '🌷'];
       for (let i = 0; i < count; i++) {
         const el = document.createElement('div');
         el.className = 'letter-rising-emoji text-2xl';
         el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        el.style.left = `${12 + Math.random() * 76}%`;
-        el.style.setProperty('--drift-x', `${(Math.random() - 0.5) * 80}px`);
-        el.style.setProperty('--dur', `${1.8 + Math.random() * 1.1}s`);
-        el.style.animationDelay = `${Math.random() * 0.45}s`;
+        el.style.left = `${10 + Math.random() * 80}%`;
+        el.style.setProperty('--drift-x', `${(Math.random() - 0.5) * 64}px`);
+        el.style.setProperty('--dur', `${3.2 + Math.random() * 1.3}s`);
+        el.style.animationDelay = `${i * 0.11 + Math.random() * 0.25}s`;
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 3200);
+        setTimeout(() => el.remove(), 5200);
       }
     }
 
@@ -698,7 +765,7 @@
 
 
     // =========================================================================
-    // STEP 1: PASTEL PINK FINGERPRINT SCANNER
+    // STEP 1: PASTEL PINK FINGERPRINT SCANNER (SOUND + VIBRATION + UNLOCK)
     // =========================================================================
     const CIRCUMFERENCE = 2 * Math.PI * 53;
     const HOLD_DURATION = 1750;
@@ -707,7 +774,7 @@
     let progress = 0;
     let lastTime = null;
     let rafId = null;
-    let particleTimer = 0;
+    let pulseTimer = 0;
 
     function updateScannerVisuals() {
       const offset = CIRCUMFERENCE * (1 - progress);
@@ -716,11 +783,11 @@
       if (isUnlocked) {
         fingerprintIcon.classList.remove('text-blush-400', 'text-blush-600');
         fingerprintIcon.classList.add('text-rose-500');
-        scanLabel.innerHTML = '<span>🩷</span><span>ยืนยันตัวตนสำเร็จ!</span>';
+        scanLabel.innerHTML = '<span>🔓</span><span>ปลดล็อคแล้ว!</span>';
       } else if (isHolding) {
         fingerprintIcon.classList.remove('text-blush-400');
         fingerprintIcon.classList.add('text-blush-600');
-        scanLabel.innerHTML = '<span>✨</span><span>กำลังตรวจสอบ...</span>';
+        scanLabel.innerHTML = '<span>✨</span><span>กำลังสแกน...</span>';
       } else {
         fingerprintIcon.classList.remove('text-blush-600', 'text-rose-500');
         fingerprintIcon.classList.add('text-blush-400');
@@ -735,11 +802,12 @@
 
       if (isHolding && !isUnlocked) {
         progress = Math.min(1, progress + dt / HOLD_DURATION);
-        particleTimer += dt;
-        if (particleTimer > 260) {
-          particleTimer = 0;
+        pulseTimer += dt;
+        if (pulseTimer > 210) {
+          pulseTimer = 0;
           spawnMiniPopHeart(scannerContainer);
-          sfx.scanTick(progress);
+          sfx.scanPulse(progress);
+          vibrateSoft(22);
         }
         updateScannerVisuals();
 
@@ -749,8 +817,11 @@
           scannerPad.classList.remove('scanning');
           updateScannerVisuals();
 
-          sfx.unlockChime();
+          // Distinct unlock sound + short vibration right after scan completes
+          sfx.unlockSound();
+          vibrateSoft([35, 45, 70]);
           burstFallingHearts(24);
+
           setTimeout(() => {
             startBgMusicNow();
           }, 550);
@@ -781,6 +852,7 @@
       getAudioCtx();
       unlockBgMusicOnTouch();
       isHolding = true;
+      pulseTimer = 210; // Trigger first pulse sound & gentle buzz right away
       scannerPad.classList.add('scanning');
       lastTime = null;
       cancelAnimationFrame(rafId);
@@ -824,11 +896,10 @@
 
 
     // =========================================================================
-    // SEAMLESS INTERLOCKING JIGSAW PUZZLE ENGINE (NO STRETCHING, NO GAPS)
+    // SEAMLESS INTERLOCKING JIGSAW PUZZLE ENGINE
     // =========================================================================
     const GRID = 3;
     const TAB_RATIO = 0.21;
-    // Max tab tip extends to 1.08 * TAB_RATIO; use 1.15 so clipping never clips a tab tip
     const CLIP_MARGIN_RATIO = TAB_RATIO * 1.15;
 
     let pieces = [];
@@ -1038,7 +1109,6 @@
         return;
       }
 
-      // Slot guides
       for (let r = 0; r < GRID; r++) {
         for (let c = 0; c < GRID; c++) {
           const cx = bx + (c + 0.5) * cellW;
@@ -1080,7 +1150,6 @@
           const natW = originalPhoto.naturalWidth;
           const natH = originalPhoto.naturalHeight;
 
-          // Destination box includes full tab margin so outward tabs fit seamlessly
           const marginX = cellW * CLIP_MARGIN_RATIO;
           const marginY = cellH * CLIP_MARGIN_RATIO;
           const dstX = -cellW / 2 - marginX;
@@ -1088,7 +1157,6 @@
           const dstW = cellW + marginX * 2;
           const dstH = cellH + marginY * 2;
 
-          // Map destination box 1:1 back onto natural image coordinates (no aspect distortion)
           const scaleX = natW / bW;
           const scaleY = natH / bH;
           const pieceBoardLeft = bx + p.col * cellW;
@@ -1106,7 +1174,6 @@
         }
         ctx.restore();
 
-        // Crisp hairline border so pieces fit together cleanly
         ctx.strokeStyle = p.snapped
           ? 'rgba(255, 255, 255, 0.35)'
           : 'rgba(255, 255, 255, 0.8)';
@@ -1139,7 +1206,7 @@
         const dist = Math.hypot(pos.x - p.x, pos.y - p.y);
         if (dist <= hitRadius) {
           activePiece = p;
-          activePiece.scale = 1.0; // Exact 1.0 scale so snapped pieces align to sub-pixel accuracy
+          activePiece.scale = 1.0;
           dragOffset.x = pos.x - p.x;
           dragOffset.y = pos.y - p.y;
           sfx.piecePick();
@@ -1245,7 +1312,7 @@
 
 
     // =========================================================================
-    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> PASTEL LETTER + RISING EMOJIS
+    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> PAPER SOUND + SLOW RISING EMOJIS
     // =========================================================================
     let envelopeOpened = false;
 
@@ -1253,14 +1320,16 @@
       if (e) e.preventDefault();
       if (envelopeOpened) return;
       envelopeOpened = true;
+      getAudioCtx();
       if (isUnlocked && !musicStarted) startBgMusicNow();
 
       envelopeBox.classList.remove('animate-duk-dik');
       envelopeBox.classList.add('env-opened');
       envelopeHint.style.opacity = '0';
-      sfx.envelopeOpen();
-      spawnLetterOpenEmojis(24);
-      burstFallingHearts(24);
+
+      sfx.letterPaperOpen();
+      vibrateSoft(25);
+      spawnSlowRisingEmojis(20);
 
       setTimeout(() => {
         envelopeWrapper.classList.add('hidden');
