@@ -150,92 +150,6 @@
       transform: rotateX(180deg);
     }
 
-    /* Realistic 3D Envelope & Sliding Paper Letter */
-    .letter-scene {
-      perspective: 1100px;
-    }
-
-    .realistic-envelope {
-      position: relative;
-      width: 286px;
-      height: 186px;
-      transform-style: preserve-3d;
-    }
-
-    .env-flap-3d {
-      transform-origin: 50% 0%;
-      transition: transform 0.72s cubic-bezier(0.34, 1.35, 0.64, 1), z-index 0s linear 0.32s;
-      transform: rotateX(0deg);
-      z-index: 30;
-    }
-
-    .envelope-opened .env-flap-3d {
-      transform: rotateX(180deg);
-      z-index: 5;
-    }
-
-    .heart-seal-sticker {
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
-    }
-
-    .envelope-opened .heart-seal-sticker {
-      transform: translate(-50%, -50%) scale(1.45) rotate(18deg);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* Paper Letter inside Envelope -> Slides Up & Expands Smoothly */
-    .letter-paper-sheet {
-      position: absolute;
-      left: 50%;
-      bottom: 14px;
-      width: 256px;
-      height: 152px;
-      transform: translateX(-50%) translateY(0px);
-      background-color: #FFFDF9;
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 29px,
-        #FFE4EC 30px
-      );
-      background-position: 0 78px;
-      border: 2px solid #FFD6E2;
-      border-radius: 22px;
-      box-shadow: 0 10px 26px rgba(244, 91, 137, 0.16);
-      z-index: 12;
-      overflow: hidden;
-      opacity: 0.96;
-      transition:
-        transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.38s,
-        width 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.72s,
-        height 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.72s,
-        bottom 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.72s,
-        box-shadow 0.6s ease 0.72s,
-        z-index 0s linear 0.55s;
-    }
-
-    .envelope-opened .letter-paper-sheet {
-      z-index: 40;
-      bottom: -82px;
-      width: 336px;
-      height: 368px;
-      transform: translateX(-50%) translateY(-48px);
-      box-shadow: 0 22px 54px rgba(244, 91, 137, 0.25);
-      opacity: 1;
-    }
-
-    .letter-inner-content {
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.5s ease 1.05s, transform 0.5s ease 1.05s;
-    }
-
-    .envelope-opened .letter-inner-content {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
     /* Floating Hearts & Sparkles Confetti */
     @keyframes floatUpSparkle {
       0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
@@ -309,14 +223,13 @@
     <!-- ========================================================= -->
     <section id="stage-1" class="stage-panel stage-active z-10 flex flex-col justify-between items-center px-6 py-12 text-center">
       
-      <!-- Minimal Cute Warm Verification Prompt (No Crown) -->
-      <div class="mt-4 flex flex-col items-center max-w-[290px]">
-        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/85 text-blush-500 text-xs font-medium shadow-sm mb-3">
-          <span>💗</span>
-          <span>ระบบยืนยันตัวตนสุดพิเศษ</span>
-        </span>
-        <h1 class="text-lg font-medium text-blush-600 leading-relaxed">
-          แตะนิ้วค้างไว้เพื่อสแกนยืนยันตัวตน<br/>ว่าเป็นคุณพ่อสุดที่รัก 💗
+      <!-- Minimal Cute Title -->
+      <div class="mt-2 flex flex-col items-center">
+        <div class="w-12 h-12 rounded-2xl bg-white/90 shadow-sm flex items-center justify-center text-2xl mb-3 animate-bounce">
+          👑
+        </div>
+        <h1 class="text-2xl font-semibold text-blush-600 tracking-tight">
+          สุขสันต์วันพ่อ 🩷
         </h1>
       </div>
 
@@ -390,111 +303,122 @@
 
 
     <!-- ========================================================= -->
-    <!-- STEP 3 & 4: REALISTIC 3D ENVELOPE & SLIDING PAPER LETTER  -->
+    <!-- STEP 2: REAL INTERLOCKING JIGSAW PUZZLE (3x3)             -->
     <!-- ========================================================= -->
-    <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-5 py-8 text-center">
+    <section id="stage-2" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-3 pt-6 pb-4">
+      
+      <!-- Minimal Cute Header (No Buttons, No Clutter) -->
+      <div class="text-center shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/85 text-blush-500 text-xs font-medium shadow-sm">
+          <span>🧩</span>
+          <span id="puzzle-header-text">ต่อภาพความทรงจำ</span>
+        </span>
+      </div>
+
+      <!-- Full Interactive HTML5 Canvas for Real Curved Jigsaw Pieces -->
+      <div id="puzzle-stage-area" class="relative w-full flex-1 my-2 flex items-center justify-center">
+        <canvas id="puzzle-canvas" class="w-full h-full"></canvas>
+      </div>
+
+      <!-- Bottom Progress Dots -->
+      <div class="flex items-center gap-2 opacity-60 shrink-0">
+        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
+        <span class="w-2 h-2 rounded-full bg-blush-400"></span>
+        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
+      </div>
+    </section>
+
+
+    <!-- ========================================================= -->
+    <!-- STEP 3 & 4: WIGGLING ENVELOPE -> GREETING CARD            -->
+    <!-- ========================================================= -->
+    <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-6 py-10 text-center">
       
       <!-- Minimal Top Spacer -->
-      <div class="h-3"></div>
+      <div class="h-4"></div>
 
-      <!-- Center: Realistic 3D Envelope with Sliding Lined Paper Letter -->
-      <div class="relative w-full flex-1 flex flex-col items-center justify-center letter-scene">
+      <!-- Center: Wiggling Cute Envelope OR Opened Greeting Card -->
+      <div class="relative w-full flex-1 flex items-center justify-center">
         
-        <div id="envelope-stage" class="relative flex flex-col items-center justify-center">
+        <!-- STEP 3: Wiggling Pastel Pink Envelope ("เด้งดุ้กดิ้กๆ") -->
+        <div id="envelope-wrapper" class="flex flex-col items-center justify-center cursor-pointer group">
           
-          <!-- Realistic Pastel Pink-Cream Envelope -->
-          <div id="envelope-box"
-               role="button"
-               tabindex="0"
-               aria-label="เปิดซองจดหมาย"
-               class="realistic-envelope animate-duk-dik cursor-pointer select-none">
-            
-            <!-- 1. Envelope Back Pocket -->
-            <div class="absolute inset-0 rounded-[24px] bg-gradient-to-b from-[#FFC4D6] to-[#FFB0C8] border-2 border-[#FF99B8] shadow-[0_16px_34px_rgba(244,91,137,0.24)]"></div>
+          <!-- Minimal Cute Tap Prompt -->
+          <div class="mb-5 px-4 py-1.5 rounded-full bg-white/95 shadow-sm text-blush-500 text-xs font-medium animate-bounce">
+            💌 แตะเปิดจดหมาย
+          </div>
 
-            <!-- 2. Lined Paper Letter Sheet Inside Envelope (Slides Up & Expands on Open!) -->
-            <article id="letter-paper" class="letter-paper-sheet px-6 pt-5 pb-6 flex flex-col items-center text-center">
+          <!-- Lineless Cute Pastel Pink Envelope -->
+          <div id="envelope-box" class="animate-duk-dik relative w-64 h-44 drop-shadow-[0_16px_28px_rgba(244,91,137,0.25)] transition-transform group-active:scale-95">
+            <svg viewBox="0 0 260 180" class="w-full h-full overflow-visible">
+              <!-- Envelope Base (Soft Rose Pink, Lineless) -->
+              <rect x="10" y="20" width="240" height="150" rx="24" fill="#FFB3C8" />
               
-              <!-- Decorative Top Paper Header (Visible immediately as it peeks/slides out) -->
-              <div class="w-full flex items-center justify-between text-blush-400 text-xs mb-2 shrink-0">
-                <span>🌸</span>
-                <span class="px-3 py-0.5 rounded-full bg-blush-100/80 text-blush-500 font-medium text-[11px]">
-                  ถึง... คุณพ่อสุดที่รัก 💌
-                </span>
-                <span>🌸</span>
-              </div>
+              <!-- Inner Cream Letter Peeking -->
+              <rect x="28" y="34" width="204" height="118" rx="16" fill="#FFFDF9" />
+              <line x1="62" y1="62" x2="152" y2="62" stroke="#FFD6E2" stroke-width="5" stroke-linecap="round"/>
+              <line x1="62" y1="80" x2="195" y2="80" stroke="#FFEBF1" stroke-width="5" stroke-linecap="round"/>
 
-              <!-- Full Greeting Message (Fades in smoothly once sheet unfolds) -->
-              <div class="letter-inner-content flex-1 w-full flex flex-col items-center justify-between pt-1">
-                
-                <!-- Circular Mini Illustration -->
-                <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-blush-300 to-pink-100 shadow-sm mb-2 shrink-0">
-                  <img id="card-mini-illustration" src="" alt="พ่อกับลูก" class="w-full h-full rounded-full object-cover" />
-                </div>
+              <!-- Side Folds -->
+              <path d="M12 28 L130 108 L12 164 Z" fill="#FFC4D6" />
+              <path d="M248 28 L130 108 L248 164 Z" fill="#FFC4D6" />
 
-                <h2 class="text-lg font-semibold text-blush-600 mb-1">
-                  สุขสันต์วันพ่อนะคะ 🩷
-                </h2>
+              <!-- Bottom Fold -->
+              <path d="M12 164 L130 92 L248 164 Q244 170 236 170 L24 170 Q16 170 12 164 Z" fill="#FF9EB9" />
 
-                <!-- Editable Greeting Message Text -->
-                <p id="letter-message-body" class="text-slate-600 text-[14.5px] leading-[30px] font-normal px-1">
-                  ขอบคุณพ่อที่คอยดูแลและเป็นกำลังใจให้หนูเสมอ<br/>
-                  ขอให้พ่อสุขภาพแข็งแรง ยิ้มเยอะๆ<br/>
-                  อยู่เป็นความสุขของหนูไปนานๆ นะคะ
-                </p>
+              <!-- Top Flap (Animates Open) -->
+              <g class="envelope-flap">
+                <path d="M12 24 Q16 20 24 20 L236 20 Q244 20 248 24 L130 112 Z" fill="#FF85A8" />
+              </g>
 
-                <div class="w-full pt-2 flex items-center justify-center gap-1.5 text-blush-500 font-medium text-sm">
-                  <span>รักพ่อที่สุดในโลกเลย</span>
-                  <span>🥰💕</span>
-                </div>
-              </div>
-            </article>
+              <!-- Cute Kawaii Cheeks -->
+              <ellipse cx="52" cy="138" rx="9" ry="5.5" fill="#F45B89" opacity="0.35"/>
+              <ellipse cx="208" cy="138" rx="9" ry="5.5" fill="#F45B89" opacity="0.35"/>
 
-            <!-- 3. Envelope Front Side & Bottom Folds (Covers lower part of paper before opening) -->
-            <svg viewBox="0 0 286 186" class="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
-              <!-- Left Flap -->
-              <path d="M2 16 L143 108 L2 174 Q2 168 2 162 Z" fill="#FFD4E2" stroke="#FF9EBC" stroke-width="1.5" stroke-linejoin="round" />
-              <!-- Right Flap -->
-              <path d="M284 16 L143 108 L284 174 Q284 168 284 162 Z" fill="#FFD4E2" stroke="#FF9EBC" stroke-width="1.5" stroke-linejoin="round" />
-              <!-- Bottom Pocket Flap -->
-              <path d="M3 176 L143 92 L283 176 Q279 184 264 184 L22 184 Q7 184 3 176 Z" fill="#FFB8CE" stroke="#FF96B6" stroke-width="1.5" stroke-linejoin="round" />
-              <!-- Cute Subtle Blush Cheeks on Envelope -->
-              <ellipse cx="56" cy="152" rx="10" ry="5.5" fill="#F45B89" opacity="0.28" />
-              <ellipse cx="230" cy="152" rx="10" ry="5.5" fill="#F45B89" opacity="0.28" />
+              <!-- Cute Heart Seal -->
+              <g transform="translate(130, 108)">
+                <circle cx="0" cy="0" r="22" fill="#FFFFFF" />
+                <path d="M0 9 C-10 1 -14 -6 -8 -11 C-4 -14 0 -10 0 -7 C0 -10 4 -14 8 -11 C14 -6 10 1 0 9 Z" fill="#F45B89"/>
+              </g>
             </svg>
+          </div>
+        </div>
 
-            <!-- 4. Envelope Top Triangular Flap (3D Rotates Open Upwards) -->
-            <div class="env-flap-3d absolute top-0 left-0 w-full h-[116px] pointer-events-none">
-              <svg viewBox="0 0 286 116" class="w-full h-full overflow-visible drop-shadow-[0_4px_6px_rgba(244,91,137,0.16)]">
-                <path d="M3 12 Q8 2 22 2 L264 2 Q278 2 283 12 L143 108 Z" fill="#FF9AB8" stroke="#FF82A8" stroke-width="1.5" stroke-linejoin="round" />
-              </svg>
-            </div>
+        <!-- STEP 4: Clean Pastel Pink & Cream Greeting Card -->
+        <div id="greeting-card" class="hidden w-full max-w-[350px] bg-white/95 backdrop-blur-sm rounded-[32px] shadow-[0_20px_50px_rgba(244,91,137,0.2)] p-6 flex-col items-center text-center relative overflow-hidden">
+          
+          <!-- Soft Pastel Top Ribbon -->
+          <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blush-300 via-blush-400 to-blush-300"></div>
 
-            <!-- 5. Cute Heart Sticker Seal on Flap Tip -->
-            <div class="heart-seal-sticker absolute left-1/2 top-[104px] -translate-x-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(244,91,137,0.28)] border-2 border-blush-200 flex items-center justify-center pointer-events-none">
-              <span class="text-xl leading-none">💗</span>
-            </div>
-
+          <!-- Circular Mini Illustration Thumbnail -->
+          <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-blush-300 to-pink-100 shadow-md mb-4 mt-1">
+            <img id="card-mini-illustration" src="" alt="พ่อกับลูก" class="w-full h-full rounded-full object-cover" />
           </div>
 
-          <!-- Minimal Tap Hint Below Envelope -->
-          <div id="tap-envelope-hint" class="mt-6 px-4 py-1.5 rounded-full bg-white/95 shadow-sm text-blush-500 text-xs font-medium animate-bounce transition-opacity duration-300">
-            แตะเพื่อเปิดจดหมาย 💌
-          </div>
+          <!-- Heartfelt Concise Thai Father's Day Message -->
+          <h2 class="text-xl font-semibold text-blush-600 mb-3">
+            สุขสันต์วันพ่อนะคะ 🩷
+          </h2>
 
+          <p class="text-slate-600 text-[15px] leading-relaxed font-normal space-y-2">
+            ขอบคุณพ่อที่คอยดูแลและเป็นกำลังใจให้หนูเสมอมา<br/>
+            ขอให้พ่อสุขภาพแข็งแรง มีความสุขมากๆ<br/>
+            อยู่เป็นรอยยิ้มของหนูไปนานๆ นะคะ
+          </p>
+
+          <div class="mt-5 pt-4 border-t border-blush-100 w-full flex flex-col items-center">
+            <span class="text-blush-500 font-medium text-base">
+              รักพ่อที่สุดเลย 🥰✨
+            </span>
+          </div>
         </div>
 
       </div>
 
-      <!-- Subtle Minimal Replay / Fold Controls at Bottom (Shown after letter opens) -->
-      <div id="letter-controls" class="h-11 flex items-center justify-center gap-3 opacity-0 pointer-events-none transition-opacity duration-500">
-        <button id="fold-letter-btn" type="button"
-                class="px-3.5 py-1.5 rounded-full bg-white/85 hover:bg-white text-blush-500 text-xs font-medium shadow-sm flex items-center gap-1 transition active:scale-95">
-          <span>✉️</span>
-          <span>พับเก็บ</span>
-        </button>
+      <!-- Subtle Minimal Replay Icon Button at Bottom (Only shown on Step 4) -->
+      <div class="h-10 flex items-center justify-center">
         <button id="replay-btn" type="button" aria-label="เล่นอีกครั้ง"
-                class="w-8 h-8 rounded-full bg-white/85 hover:bg-white text-blush-400 shadow-sm flex items-center justify-center transition active:scale-90">
+                class="hidden w-9 h-9 rounded-full bg-white/80 hover:bg-white text-blush-400 shadow-sm items-center justify-center transition active:scale-90">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
@@ -514,53 +438,6 @@
      */
     const CUSTOM_IMAGE_URL = "";
 
-    // --- Soft Cute Sound Effects via Web Audio API (No external files needed) ---
-    let audioCtx = null;
-    function playCuteSound(type = 'snap') {
-      try {
-        if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContextClass) return;
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        if (type === 'snap') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(520, now);
-          osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
-          gain.gain.setValueAtTime(0.11, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-          osc.start(now);
-          osc.stop(now + 0.13);
-        } else if (type === 'chime') {
-          const notes = [523.25, 659.25, 783.99, 1046.5];
-          notes.forEach((freq, idx) => {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.type = 'triangle';
-            o.frequency.setValueAtTime(freq, now + idx * 0.08);
-            g.gain.setValueAtTime(0.09, now + idx * 0.08);
-            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.35);
-            o.connect(g);
-            g.connect(audioCtx.destination);
-            o.start(now + idx * 0.08);
-            o.stop(now + idx * 0.08 + 0.36);
-          });
-        }
-      } catch (err) {
-        // Ignore audio block errors safely
-      }
-    }
-
     // --- Stage Elements ---
     const stage1 = document.getElementById('stage-1');
     const stage2 = document.getElementById('stage-2');
@@ -579,11 +456,10 @@
     const puzzleHeaderText = document.getElementById('puzzle-header-text');
 
     // --- Step 3 & 4 Elements ---
+    const envelopeWrapper = document.getElementById('envelope-wrapper');
     const envelopeBox = document.getElementById('envelope-box');
-    const tapEnvelopeHint = document.getElementById('tap-envelope-hint');
+    const greetingCard = document.getElementById('greeting-card');
     const cardMiniIllustration = document.getElementById('card-mini-illustration');
-    const letterControls = document.getElementById('letter-controls');
-    const foldLetterBtn = document.getElementById('fold-letter-btn');
     const replayBtn = document.getElementById('replay-btn');
 
     // --- Helper: Switch Stages Smoothly ---
@@ -677,7 +553,6 @@
           isHolding = false;
           scannerPad.classList.remove('scanning');
           updateScannerVisuals();
-          playCuteSound('chime');
           burstFallingHearts(24);
 
           setTimeout(() => {
@@ -1337,7 +1212,6 @@
       piece.scale = 1.0;
       piece.snapped = true;
       activePiece = null;
-      playCuteSound('snap');
 
       // Cute sparkle pop at snapped location
       const pop = document.createElement('span');
@@ -1361,13 +1235,12 @@
           showCompletedFullImage = true;
           puzzleHeaderText.textContent = 'รักพ่อที่สุดเลย 🩷';
           drawPuzzleScene();
-          playCuteSound('chime');
           burstFallingHearts(32);
 
-          // 2. Pause ~3.0 seconds so Dad can admire the full completed picture unobstructed!
+          // 2. Pause ~2.8 seconds so Dad can admire the full completed picture unobstructed!
           setTimeout(() => {
             switchStage(3);
-          }, 3000);
+          }, 2850);
         }, 320);
       }
     }
@@ -1397,48 +1270,23 @@
     // =========================================================================
     // STEP 3 & 4: WIGGLING ENVELOPE -> OPEN FATHER'S DAY GREETING CARD
     // =========================================================================
-    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> SLIDING LINED PAPER LETTER
-    // =========================================================================
     let envelopeOpened = false;
 
-    function openEnvelopeLetter() {
+    envelopeWrapper.addEventListener('click', () => {
       if (envelopeOpened) return;
       envelopeOpened = true;
 
-      playCuteSound('chime');
       envelopeBox.classList.remove('animate-duk-dik');
-      envelopeBox.classList.add('envelope-opened');
-      tapEnvelopeHint.classList.add('opacity-0', 'pointer-events-none');
+      envelopeBox.classList.add('envelope-open');
       burstFallingHearts(30);
 
       setTimeout(() => {
-        letterControls.classList.remove('opacity-0', 'pointer-events-none');
-      }, 950);
-    }
-
-    function closeEnvelopeLetter() {
-      if (!envelopeOpened) return;
-      envelopeOpened = false;
-
-      envelopeBox.classList.remove('envelope-opened');
-      letterControls.classList.add('opacity-0', 'pointer-events-none');
-
-      setTimeout(() => {
-        if (!envelopeOpened) {
-          envelopeBox.classList.add('animate-duk-dik');
-          tapEnvelopeHint.classList.remove('opacity-0', 'pointer-events-none');
-        }
-      }, 850);
-    }
-
-    envelopeBox.addEventListener('click', () => {
-      if (!envelopeOpened) {
-        openEnvelopeLetter();
-      }
-    });
-
-    foldLetterBtn.addEventListener('click', () => {
-      closeEnvelopeLetter();
+        envelopeWrapper.classList.add('hidden');
+        greetingCard.classList.remove('hidden');
+        greetingCard.classList.add('flex', 'animate-pop-in');
+        replayBtn.classList.remove('hidden');
+        replayBtn.classList.add('flex');
+      }, 620);
     });
 
     // Subtle Replay Button
@@ -1452,10 +1300,13 @@
 
       // Reset Step 3 & 4
       envelopeOpened = false;
-      envelopeBox.classList.remove('envelope-opened');
+      envelopeBox.classList.remove('envelope-open');
       envelopeBox.classList.add('animate-duk-dik');
-      tapEnvelopeHint.classList.remove('opacity-0', 'pointer-events-none');
-      letterControls.classList.add('opacity-0', 'pointer-events-none');
+      envelopeWrapper.classList.remove('hidden');
+      greetingCard.classList.add('hidden');
+      greetingCard.classList.remove('flex', 'animate-pop-in');
+      replayBtn.classList.add('hidden');
+      replayBtn.classList.remove('flex');
 
       switchStage(1);
     });
