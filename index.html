@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>สุขสันต์วันพ่อ 🩷</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Kanit & Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            prompt: ['Prompt', 'sans-serif'],
+            kanit: ['Kanit', 'sans-serif'],
+          },
+          colors: {
+            blush: {
+              50: '#FFF8FA',
+              100: '#FFEDF2',
+              200: '#FFD6E2',
+              300: '#FFB3C8',
+              400: '#FF85A8',
+              500: '#F45B89',
+              600: '#DB3E6E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Prompt', 'Kanit', sans-serif;
+      background: linear-gradient(145deg, #FFE4EC 0%, #FFF5F8 50%, #FFD6E4 100%);
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Mobile Portrait Frame */
+    #app-shell {
+      width: 100%;
+      max-width: 430px;
+      height: 100dvh;
+      max-height: 932px;
+      background: linear-gradient(180deg, #FFF9FB 0%, #FFEFF4 55%, #FFE3EC 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(244, 91, 137, 0.18);
+    }
+
+    @media (min-width: 450px) {
+      #app-shell {
+        height: 92dvh;
+        border-radius: 38px;
+        border: 6px solid #FFFFFF;
+      }
+    }
+
+    /* Gentle Floating Cartoon Decorations */
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+      50% { transform: translateY(-10px) rotate(6deg) scale(1.05); }
+    }
+    .animate-float-soft {
+      animation: floatSoft 4.2s ease-in-out infinite;
+    }
+
+    /* Fingerprint Scanner Laser Bar */
+    @keyframes pinkLaser {
+      0% { top: 14%; opacity: 0.25; }
+      50% { top: 82%; opacity: 1; }
+      100% { top: 14%; opacity: 0.25; }
+    }
+    .laser-bar {
+      position: absolute;
+      left: 15%;
+      right: 15%;
+      height: 3.5px;
+      background: linear-gradient(90deg, transparent, #FF6B9A, #FFFFFF, #FF6B9A, transparent);
+      box-shadow: 0 0 14px #FF5C93, 0 0 6px #FFFFFF;
+      border-radius: 99px;
+      animation: pinkLaser 1.25s ease-in-out infinite;
+      display: none;
+    }
+    .scanning .laser-bar {
+      display: block;
+    }
+
+    @keyframes pulseAura {
+      0%, 100% { transform: scale(0.95); opacity: 0.65; }
+      50% { transform: scale(1.08); opacity: 0.2; }
+    }
+    .pulse-aura {
+      animation: pulseAura 2.4s infinite ease-in-out;
+    }
+
+    /* Pop-up Wiggling Envelope ("เด้งดุ้กดิ้กๆ") */
+    @keyframes popInBounce {
+      0% { transform: scale(0.2) translateY(60px); opacity: 0; }
+      65% { transform: scale(1.08) translateY(-8px); opacity: 1; }
+      85% { transform: scale(0.96) translateY(3px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .animate-pop-in {
+      animation: popInBounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes wiggleDukDik {
+      0%, 100% { transform: rotate(0deg) scale(1) translateY(0); }
+      12% { transform: rotate(-6deg) scale(1.04) translateY(-5px); }
+      24% { transform: rotate(6deg) scale(1.05) translateY(-8px); }
+      36% { transform: rotate(-5deg) scale(1.03) translateY(-4px); }
+      48% { transform: rotate(5deg) scale(1.03) translateY(-6px); }
+      62% { transform: rotate(-2deg) scale(1.01) translateY(-2px); }
+      76% { transform: rotate(2deg) scale(1.01) translateY(-3px); }
+    }
+    .animate-duk-dik {
+      animation: wiggleDukDik 1.5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    /* Envelope Flap 3D Open */
+    .envelope-flap {
+      transform-origin: top center;
+      transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .envelope-open .envelope-flap {
+      transform: rotateX(180deg);
+    }
+
+    /* Realistic 3D Envelope & Sliding Paper Letter */
+    .letter-scene {
+      perspective: 1100px;
+    }
+
+    .realistic-envelope {
+      position: relative;
+      width: 286px;
+      height: 186px;
+      transform-style: preserve-3d;
+    }
+
+    .env-flap-3d {
+      transform-origin: 50% 0%;
+      transition: transform 0.72s cubic-bezier(0.34, 1.35, 0.64, 1), z-index 0s linear 0.32s;
+      transform: rotateX(0deg);
+      z-index: 30;
+    }
+
+    .envelope-opened .env-flap-3d {
+      transform: rotateX(180deg);
+      z-index: 5;
+    }
+
+    .heart-seal-sticker {
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+    }
+
+    .envelope-opened .heart-seal-sticker {
+      transform: translate(-50%, -50%) scale(1.45) rotate(18deg);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Paper Letter inside Envelope -> Slides Up & Expands Smoothly */
+    .letter-paper-sheet {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      width: 256px;
+      height: 152px;
+      transform: translateX(-50%) translateY(0px);
+      background-color: #FFFDF9;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 29px,
+        #FFE4EC 30px
+      );
+      background-position: 0 78px;
+      border: 2px solid #FFD6E2;
+      border-radius: 22px;
+      box-shadow: 0 10px 26px rgba(244, 91, 137, 0.16);
+      z-index: 12;
+      overflow: hidden;
+      opacity: 0.96;
+      transition:
+        transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.38s,
+        width 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.72s,
+        height 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.72s,
+        bottom 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.72s,
+        box-shadow 0.6s ease 0.72s,
+        z-index 0s linear 0.55s;
+    }
+
+    .envelope-opened .letter-paper-sheet {
+      z-index: 40;
+      bottom: -82px;
+      width: 336px;
+      height: 368px;
+      transform: translateX(-50%) translateY(-48px);
+      box-shadow: 0 22px 54px rgba(244, 91, 137, 0.25);
+      opacity: 1;
+    }
+
+    .letter-inner-content {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease 1.05s, transform 0.5s ease 1.05s;
+    }
+
+    .envelope-opened .letter-inner-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Floating Hearts & Sparkles Confetti */
+    @keyframes floatUpSparkle {
+      0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-130px) scale(1.25) rotate(25deg); opacity: 0; }
+    }
+    .mini-pop-heart {
+      position: absolute;
+      pointer-events: none;
+      animation: floatUpSparkle 1.1s ease-out forwards;
+      z-index: 40;
+    }
+
+    @keyframes fallHearts {
+      0% { transform: translateY(-24px) rotate(0deg) scale(0.8); opacity: 1; }
+      100% { transform: translateY(105dvh) rotate(320deg) scale(1.1); opacity: 0; }
+    }
+    .falling-heart {
+      position: fixed;
+      top: -24px;
+      pointer-events: none;
+      z-index: 90;
+      animation: fallHearts linear forwards;
+    }
+
+    /* Stage Transitions */
+    .stage-panel {
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .stage-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96);
+      position: absolute;
+      inset: 0;
+    }
+    .stage-active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+      position: relative;
+      height: 100%;
+    }
+
+    /* Jigsaw Canvas Touch Prevention */
+    #puzzle-canvas {
+      touch-action: none;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Portrait Shell -->
+  <main id="app-shell">
+
+    <!-- Soft Lineless Pastel Background Shapes & Floating Icons -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden z-0">
+      <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-blush-200/50 blur-2xl"></div>
+      <div class="absolute top-1/3 -right-14 w-52 h-52 rounded-full bg-pink-200/45 blur-2xl"></div>
+      <div class="absolute -bottom-14 left-6 w-56 h-56 rounded-full bg-rose-200/50 blur-2xl"></div>
+
+      <!-- Subtle Cute Floating Cartoons -->
+      <span class="absolute top-8 left-7 text-xl opacity-65 animate-float-soft">🩷</span>
+      <span class="absolute top-14 right-8 text-lg opacity-60 animate-float-soft" style="animation-delay: 1.1s;">✨</span>
+      <span class="absolute bottom-12 left-8 text-lg opacity-55 animate-float-soft" style="animation-delay: 2s;">🌸</span>
+      <span class="absolute bottom-20 right-7 text-xl opacity-60 animate-float-soft" style="animation-delay: 0.6s;">💕</span>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- STEP 1: CUTE FINGERPRINT SCANNER                          -->
+    <!-- ========================================================= -->
+    <section id="stage-1" class="stage-panel stage-active z-10 flex flex-col justify-between items-center px-6 py-12 text-center">
+      
+      <!-- Minimal Cute Warm Verification Prompt (No Crown) -->
+      <div class="mt-4 flex flex-col items-center max-w-[290px]">
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/85 text-blush-500 text-xs font-medium shadow-sm mb-3">
+          <span>💗</span>
+          <span>ระบบยืนยันตัวตนสุดพิเศษ</span>
+        </span>
+        <h1 class="text-lg font-medium text-blush-600 leading-relaxed">
+          แตะนิ้วค้างไว้เพื่อสแกนยืนยันตัวตน<br/>ว่าเป็นคุณพ่อสุดที่รัก 💗
+        </h1>
+      </div>
+
+      <!-- Centerpiece Pastel Pink Fingerprint Scanner -->
+      <div id="scanner-container" class="relative flex flex-col items-center justify-center my-auto">
+        <!-- Soft Pulsing Rings -->
+        <div class="absolute w-56 h-56 rounded-full bg-blush-200/50 pulse-aura"></div>
+        <div class="absolute w-46 h-46 rounded-full bg-pink-300/35 pulse-aura" style="animation-delay: 0.8s;"></div>
+
+        <!-- Circular Interactive Scanner Pad -->
+        <div id="scanner-pad"
+             role="button"
+             tabindex="0"
+             aria-label="สแกนลายนิ้วมือ"
+             style="touch-action: none;"
+             class="relative w-40 h-40 rounded-full bg-white shadow-[0_14px_35px_rgba(244,91,137,0.22)] flex items-center justify-center cursor-pointer transition-transform duration-200 active:scale-95">
+          
+          <!-- Circular SVG Progress Ring -->
+          <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="53" fill="none" stroke="#FFE4EC" stroke-width="6.5" />
+            <circle id="scan-progress-circle"
+                    cx="60" cy="60" r="53"
+                    fill="none"
+                    stroke="url(#pinkScanGrad)"
+                    stroke-width="6.5"
+                    stroke-linecap="round"
+                    stroke-dasharray="333.008"
+                    stroke-dashoffset="333.008" />
+            <defs>
+              <linearGradient id="pinkScanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FF85A8" />
+                <stop offset="100%" stop-color="#E11D48" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <!-- Pink Laser Bar -->
+          <div class="laser-bar"></div>
+
+          <!-- Cute Fingerprint + Mini Heart SVG Icon -->
+          <div id="fingerprint-icon" class="relative z-10 text-blush-400 transition-colors duration-300 flex flex-col items-center">
+            <svg class="w-20 h-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+              <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+              <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+              <path d="M2 12a10 10 0 0 1 18-6" />
+              <path d="M2 16h.01" />
+              <path d="M21.8 16c.2-2 .131-5.354 0-6" />
+              <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" />
+              <path d="M8.65 22c.21-.66.45-1.32.57-2" />
+              <path d="M9 6.8a6 6 0 0 1 9 5.2v2" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Minimal Prompt Pill -->
+        <div class="mt-7">
+          <span id="scan-label" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/90 text-blush-500 text-xs font-medium shadow-sm">
+            <span>👆</span>
+            <span>แตะค้างไว้</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Bottom Cute Minimal Visual Dots -->
+      <div class="flex items-center gap-2 opacity-60">
+        <span class="w-2 h-2 rounded-full bg-blush-400"></span>
+        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
+        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
+      </div>
+    </section>
+
+
+    <!-- ========================================================= -->
+    <!-- STEP 2: INTERLOCKING JIGSAW PUZZLE (3x3)                  -->
+    <!-- ========================================================= -->
+    <section id="stage-2" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-3 pt-6 pb-4 text-center">
+      
+      <!-- Minimal Top Prompt & Counter -->
+      <div class="flex items-center justify-center gap-2 shrink-0 mb-1">
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/90 text-blush-500 text-xs font-medium shadow-sm">
+          <span id="puzzle-header-text">ลากชิ้นส่วนมาต่อให้ครบนะ ✨</span>
+        </span>
+        <span id="puzzle-counter" class="inline-flex items-center px-2.5 py-1 rounded-full bg-blush-100/90 text-blush-600 text-xs font-semibold shadow-sm">
+          0/9
+        </span>
+      </div>
+
+      <!-- Full Interactive Puzzle Play Area (Board + Scattered Pieces Tray) -->
+      <div id="puzzle-stage-area" class="relative w-full flex-1 min-h-0 overflow-hidden">
+        <canvas id="puzzle-canvas"></canvas>
+      </div>
+
+      <!-- Bottom Cute Minimal Visual Dots -->
+      <div class="flex items-center gap-2 opacity-60 shrink-0 pt-1">
+        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
+        <span class="w-2 h-2 rounded-full bg-blush-400"></span>
+        <span class="w-2 h-2 rounded-full bg-blush-200"></span>
+      </div>
+    </section>
+
+
+    <!-- ========================================================= -->
+    <!-- STEP 3 & 4: REALISTIC 3D ENVELOPE & SLIDING PAPER LETTER  -->
+    <!-- ========================================================= -->
+    <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-5 py-8 text-center">
+      
+      <!-- Minimal Top Spacer -->
+      <div class="h-3"></div>
+
+      <!-- Center: Realistic 3D Envelope with Sliding Lined Paper Letter -->
+      <div class="relative w-full flex-1 flex flex-col items-center justify-center letter-scene">
+        
+        <div id="envelope-stage" class="relative flex flex-col items-center justify-center">
+          
+          <!-- Realistic Pastel Pink-Cream Envelope -->
+          <div id="envelope-box"
+               role="button"
+               tabindex="0"
+               aria-label="เปิดซองจดหมาย"
+               class="realistic-envelope animate-duk-dik cursor-pointer select-none">
+            
+            <!-- 1. Envelope Back Pocket -->
+            <div class="absolute inset-0 rounded-[24px] bg-gradient-to-b from-[#FFC4D6] to-[#FFB0C8] border-2 border-[#FF99B8] shadow-[0_16px_34px_rgba(244,91,137,0.24)]"></div>
+
+            <!-- 2. Lined Paper Letter Sheet Inside Envelope (Slides Up & Expands on Open!) -->
+            <article id="letter-paper" class="letter-paper-sheet px-6 pt-5 pb-6 flex flex-col items-center text-center">
+              
+              <!-- Decorative Top Paper Header (Visible immediately as it peeks/slides out) -->
+              <div class="w-full flex items-center justify-between text-blush-400 text-xs mb-2 shrink-0">
+                <span>🌸</span>
+                <span class="px-3 py-0.5 rounded-full bg-blush-100/80 text-blush-500 font-medium text-[11px]">
+                  ถึง... คุณพ่อสุดที่รัก 💌
+                </span>
+                <span>🌸</span>
+              </div>
+
+              <!-- Full Greeting Message (Fades in smoothly once sheet unfolds) -->
+              <div class="letter-inner-content flex-1 w-full flex flex-col items-center justify-between pt-1">
+                
+                <!-- Circular Mini Illustration -->
+                <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-blush-300 to-pink-100 shadow-sm mb-2 shrink-0">
+                  <img id="card-mini-illustration" src="" alt="พ่อกับลูก" class="w-full h-full rounded-full object-cover" />
+                </div>
+
+                <h2 class="text-lg font-semibold text-blush-600 mb-1">
+                  สุขสันต์วันพ่อนะคะ 🩷
+                </h2>
+
+                <!-- Editable Greeting Message Text -->
+                <p id="letter-message-body" class="text-slate-600 text-[14.5px] leading-[30px] font-normal px-1">
+                  ขอบคุณพ่อที่คอยดูแลและเป็นกำลังใจให้หนูเสมอ<br/>
+                  ขอให้พ่อสุขภาพแข็งแรง ยิ้มเยอะๆ<br/>
+                  อยู่เป็นความสุขของหนูไปนานๆ นะคะ
+                </p>
+
+                <div class="w-full pt-2 flex items-center justify-center gap-1.5 text-blush-500 font-medium text-sm">
+                  <span>รักพ่อที่สุดในโลกเลย</span>
+                  <span>🥰💕</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- 3. Envelope Front Side & Bottom Folds (Covers lower part of paper before opening) -->
+            <svg viewBox="0 0 286 186" class="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
+              <!-- Left Flap -->
+              <path d="M2 16 L143 108 L2 174 Q2 168 2 162 Z" fill="#FFD4E2" stroke="#FF9EBC" stroke-width="1.5" stroke-linejoin="round" />
+              <!-- Right Flap -->
+              <path d="M284 16 L143 108 L284 174 Q284 168 284 162 Z" fill="#FFD4E2" stroke="#FF9EBC" stroke-width="1.5" stroke-linejoin="round" />
+              <!-- Bottom Pocket Flap -->
+              <path d="M3 176 L143 92 L283 176 Q279 184 264 184 L22 184 Q7 184 3 176 Z" fill="#FFB8CE" stroke="#FF96B6" stroke-width="1.5" stroke-linejoin="round" />
+              <!-- Cute Subtle Blush Cheeks on Envelope -->
+              <ellipse cx="56" cy="152" rx="10" ry="5.5" fill="#F45B89" opacity="0.28" />
+              <ellipse cx="230" cy="152" rx="10" ry="5.5" fill="#F45B89" opacity="0.28" />
+            </svg>
+
+            <!-- 4. Envelope Top Triangular Flap (3D Rotates Open Upwards) -->
+            <div class="env-flap-3d absolute top-0 left-0 w-full h-[116px] pointer-events-none">
+              <svg viewBox="0 0 286 116" class="w-full h-full overflow-visible drop-shadow-[0_4px_6px_rgba(244,91,137,0.16)]">
+                <path d="M3 12 Q8 2 22 2 L264 2 Q278 2 283 12 L143 108 Z" fill="#FF9AB8" stroke="#FF82A8" stroke-width="1.5" stroke-linejoin="round" />
+              </svg>
+            </div>
+
+            <!-- 5. Cute Heart Sticker Seal on Flap Tip -->
+            <div class="heart-seal-sticker absolute left-1/2 top-[104px] -translate-x-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(244,91,137,0.28)] border-2 border-blush-200 flex items-center justify-center pointer-events-none">
+              <span class="text-xl leading-none">💗</span>
+            </div>
+
+          </div>
+
+          <!-- Minimal Tap Hint Below Envelope -->
+          <div id="tap-envelope-hint" class="mt-6 px-4 py-1.5 rounded-full bg-white/95 shadow-sm text-blush-500 text-xs font-medium animate-bounce transition-opacity duration-300">
+            แตะเพื่อเปิดจดหมาย 💌
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Subtle Minimal Replay / Fold Controls at Bottom (Shown after letter opens) -->
+      <div id="letter-controls" class="h-11 flex items-center justify-center gap-3 opacity-0 pointer-events-none transition-opacity duration-500">
+        <button id="fold-letter-btn" type="button"
+                class="px-3.5 py-1.5 rounded-full bg-white/85 hover:bg-white text-blush-500 text-xs font-medium shadow-sm flex items-center gap-1 transition active:scale-95">
+          <span>✉️</span>
+          <span>พับเก็บ</span>
+        </button>
+        <button id="replay-btn" type="button" aria-label="เล่นอีกครั้ง"
+                class="w-8 h-8 rounded-full bg-white/85 hover:bg-white text-blush-400 shadow-sm flex items-center justify-center transition active:scale-90">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /**
+     * =========================================================================
+     * OPTIONAL: ใส่ลิงก์รูปภาพคู่ของคุณกับคุณพ่อตรงนี้ได้ (ถ้าเว้นว่างไว้จะใช้ภาพการ์ตูนน่ารักอัตโนมัติ)
+     * Example: const CUSTOM_IMAGE_URL = "https://example.com/dad-and-me.jpg";
+     * =========================================================================
+     */
+    const CUSTOM_IMAGE_URL = "";
+
+    /**
+     * =========================================================================
+     * OPTIONAL: แก้ไขข้อความอวยพรในจดหมายวันพ่อตรงนี้ได้ตามต้องการ
+     * =========================================================================
+     */
+    const LETTER_MESSAGE = `ขอบคุณพ่อที่คอยดูแลและเป็นกำลังใจให้หนูเสมอ<br/>ขอให้พ่อสุขภาพแข็งแรง ยิ้มเยอะๆ<br/>อยู่เป็นความสุขของหนูไปนานๆ นะคะ`;
+
+    document.getElementById('letter-message-body').innerHTML = LETTER_MESSAGE;
+
+    // --- Soft Cute Sound Effects via Web Audio API (No external files needed) ---
+    let audioCtx = null;
+    function playCuteSound(type = 'snap') {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'snap') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'chime') {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + idx * 0.08);
+            g.gain.setValueAtTime(0.09, now + idx * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.35);
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.start(now + idx * 0.08);
+            o.stop(now + idx * 0.08 + 0.36);
+          });
+        }
+      } catch (err) {
+        // Ignore audio block errors safely
+      }
+    }
+
+    // --- Stage Elements ---
+    const stage1 = document.getElementById('stage-1');
+    const stage2 = document.getElementById('stage-2');
+    const stage3 = document.getElementById('stage-3');
+
+    // --- Step 1 Elements ---
+    const scannerContainer = document.getElementById('scanner-container');
+    const scannerPad = document.getElementById('scanner-pad');
+    const progressCircle = document.getElementById('scan-progress-circle');
+    const fingerprintIcon = document.getElementById('fingerprint-icon');
+    const scanLabel = document.getElementById('scan-label');
+
+    // --- Step 2 Elements ---
+    const puzzleStageArea = document.getElementById('puzzle-stage-area');
+    const puzzleCanvas = document.getElementById('puzzle-canvas');
+    const puzzleHeaderText = document.getElementById('puzzle-header-text');
+    const puzzleCounter = document.getElementById('puzzle-counter');
+
+    // --- Step 3 & 4 Elements ---
+    const envelopeBox = document.getElementById('envelope-box');
+    const tapEnvelopeHint = document.getElementById('tap-envelope-hint');
+    const cardMiniIllustration = document.getElementById('card-mini-illustration');
+    const letterControls = document.getElementById('letter-controls');
+    const foldLetterBtn = document.getElementById('fold-letter-btn');
+    const replayBtn = document.getElementById('replay-btn');
+
+    // --- Helper: Switch Stages Smoothly ---
+    function switchStage(num) {
+      [stage1, stage2, stage3].forEach((el, i) => {
+        if (i + 1 === num) {
+          el.classList.remove('stage-hidden');
+          el.classList.add('stage-active');
+        } else {
+          el.classList.remove('stage-active');
+          el.classList.add('stage-hidden');
+        }
+      });
+    }
+
+    // --- Helper: Celebratory Falling Pink Hearts ---
+    function burstFallingHearts(count = 26) {
+      const icons = ['🩷', '💕', '🌸', '✨', '🤍', '💖'];
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'falling-heart text-xl';
+        el.textContent = icons[Math.floor(Math.random() * icons.length)];
+        el.style.left = `${Math.random() * 100}vw`;
+        el.style.animationDuration = `${1.9 + Math.random() * 1.6}s`;
+        el.style.animationDelay = `${Math.random() * 0.35}s`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }
+    }
+
+    // --- Helper: Mini Pop Heart Particle while Scanning ---
+    function spawnMiniPopHeart(parentEl) {
+      const heart = document.createElement('span');
+      heart.className = 'mini-pop-heart text-base';
+      heart.textContent = ['🩷', '✨', '💕'][Math.floor(Math.random() * 3)];
+      const angle = (Math.random() - 0.5) * 110;
+      heart.style.left = `calc(50% + ${angle}px)`;
+      heart.style.top = '30%';
+      parentEl.appendChild(heart);
+      setTimeout(() => heart.remove(), 1100);
+    }
+
+
+    // =========================================================================
+    // STEP 1: PASTEL PINK FINGERPRINT SCANNER
+    // =========================================================================
+    const CIRCUMFERENCE = 2 * Math.PI * 53;
+    const HOLD_DURATION = 1750; // 1.75s hold
+    let isHolding = false;
+    let isUnlocked = false;
+    let progress = 0;
+    let lastTime = null;
+    let rafId = null;
+    let particleTimer = 0;
+
+    function updateScannerVisuals() {
+      const offset = CIRCUMFERENCE * (1 - progress);
+      progressCircle.style.strokeDashoffset = offset;
+
+      if (isUnlocked) {
+        fingerprintIcon.classList.remove('text-blush-400', 'text-blush-600');
+        fingerprintIcon.classList.add('text-rose-500');
+        scanLabel.innerHTML = '<span>🩷</span><span>ปลดล็อคแล้ว!</span>';
+      } else if (isHolding) {
+        fingerprintIcon.classList.remove('text-blush-400');
+        fingerprintIcon.classList.add('text-blush-600');
+        scanLabel.innerHTML = '<span>✨</span><span>กำลังสแกน...</span>';
+      } else {
+        fingerprintIcon.classList.remove('text-blush-600', 'text-rose-500');
+        fingerprintIcon.classList.add('text-blush-400');
+        scanLabel.innerHTML = '<span>👆</span><span>แตะค้างไว้</span>';
+      }
+    }
+
+    function stepScan(now) {
+      if (!lastTime) lastTime = now;
+      const dt = now - lastTime;
+      lastTime = now;
+
+      if (isHolding && !isUnlocked) {
+        progress = Math.min(1, progress + dt / HOLD_DURATION);
+        particleTimer += dt;
+        if (particleTimer > 260) {
+          particleTimer = 0;
+          spawnMiniPopHeart(scannerContainer);
+        }
+        updateScannerVisuals();
+
+        if (progress >= 1) {
+          isUnlocked = true;
+          isHolding = false;
+          scannerPad.classList.remove('scanning');
+          updateScannerVisuals();
+          playCuteSound('chime');
+          burstFallingHearts(24);
+
+          setTimeout(() => {
+            switchStage(2);
+            initJigsawPuzzle();
+          }, 850);
+          return;
+        }
+        rafId = requestAnimationFrame(stepScan);
+      } else if (!isHolding && !isUnlocked && progress > 0) {
+        progress = Math.max(0, progress - dt / 500);
+        updateScannerVisuals();
+        if (progress > 0) {
+          rafId = requestAnimationFrame(stepScan);
+        } else {
+          lastTime = null;
+        }
+      } else {
+        lastTime = null;
+      }
+    }
+
+    function beginHold(e) {
+      if (e && e.cancelable) e.preventDefault();
+      if (isUnlocked) return;
+      isHolding = true;
+      scannerPad.classList.add('scanning');
+      lastTime = null;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(stepScan);
+    }
+
+    function endHold(e) {
+      if (isUnlocked) return;
+      isHolding = false;
+      scannerPad.classList.remove('scanning');
+      lastTime = null;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(stepScan);
+    }
+
+    scannerPad.addEventListener('pointerdown', beginHold);
+    window.addEventListener('pointerup', endHold);
+    window.addEventListener('pointercancel', endHold);
+    scannerPad.addEventListener('contextmenu', (e) => e.preventDefault());
+
+
+    // =========================================================================
+    // STEP 2: LINELESS 2D FATHER & DAUGHTER ILLUSTRATION + REAL CURVED JIGSAW
+    // =========================================================================
+
+    /**
+     * Draws an adorable lineless 2D pastel cartoon illustration of a Thai Father
+     * and his Daughter smiling & hugging in a warm pastel pink & cream setting.
+     */
+    function generateFatherDaughterCanvas() {
+      const c = document.createElement('canvas');
+      c.width = 720;
+      c.height = 720;
+      const ctx = c.getContext('2d');
+
+      // 1. Soft Pastel Pink & Cream Radial Glow Background
+      const bg = ctx.createLinearGradient(0, 0, 0, 720);
+      bg.addColorStop(0, '#FFE4EE');
+      bg.addColorStop(0.55, '#FFF5F8');
+      bg.addColorStop(1, '#FFD4E3');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 720, 720);
+
+      // Soft Cream Halo Behind Characters
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+      ctx.beginPath();
+      ctx.arc(360, 340, 255, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cute Floating Pastel Hearts & Petals (Lineless)
+      function drawCuteHeart(x, y, r, color, rot = 0) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rot);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(0, r * 0.35);
+        ctx.bezierCurveTo(0, 0, -r, 0, -r, r * 0.65);
+        ctx.bezierCurveTo(-r, r * 1.25, 0, r * 1.6, 0, r * 1.9);
+        ctx.bezierCurveTo(0, r * 1.6, r, r * 1.25, r, r * 0.65);
+        ctx.bezierCurveTo(r, 0, 0, 0, 0, r * 0.35);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      drawCuteHeart(135, 165, 20, '#FF9EB9', -0.2);
+      drawCuteHeart(575, 145, 22, '#FFB3C8', 0.25);
+      drawCuteHeart(355, 105, 18, '#F45B89', 0);
+      drawCuteHeart(595, 310, 15, '#FFD1DF', 0.15);
+      drawCuteHeart(115, 330, 15, '#FFC2D4', -0.15);
+
+      // Cute Sparkle Stars
+      function drawSparkle(cx, cy, size, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - size);
+        ctx.quadraticCurveTo(cx, cy, cx + size, cy);
+        ctx.quadraticCurveTo(cx, cy, cx, cy + size);
+        ctx.quadraticCurveTo(cx, cy, cx - size, cy);
+        ctx.quadraticCurveTo(cx, cy, cx, cy - size);
+        ctx.fill();
+      }
+      drawSparkle(210, 120, 14, '#FF85A8');
+      drawSparkle(500, 195, 12, '#FBBF24');
+      drawSparkle(150, 260, 10, '#F45B89');
+
+      // 2. FATHER CHARACTER (Left-Center, Warm & Gentle)
+      // Dad's Pastel Rose-Cream Sweater
+      ctx.fillStyle = '#F78DA7';
+      ctx.beginPath();
+      ctx.roundRect(110, 445, 285, 285, [125, 125, 0, 0]);
+      ctx.fill();
+
+      // Soft Cream Sweater Collar
+      ctx.fillStyle = '#FFF7F9';
+      ctx.beginPath();
+      ctx.arc(252, 452, 42, 0, Math.PI);
+      ctx.fill();
+
+      // Dad's Neck
+      ctx.fillStyle = '#F7C6A3';
+      ctx.beginPath();
+      ctx.roundRect(226, 392, 52, 68, 24);
+      ctx.fill();
+
+      // Dad's Ears
+      ctx.fillStyle = '#F3B78E';
+      ctx.beginPath();
+      ctx.arc(164, 318, 19, 0, Math.PI * 2);
+      ctx.arc(340, 318, 19, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dad's Face (Warm Peach Skin)
+      ctx.fillStyle = '#FAD2B4';
+      ctx.beginPath();
+      ctx.roundRect(168, 222, 168, 185, 82);
+      ctx.fill();
+
+      // Dad's Soft Dark-Cocoa Hair (Lineless)
+      ctx.fillStyle = '#4A3531';
+      ctx.beginPath();
+      ctx.arc(252, 265, 88, Math.PI, Math.PI * 2);
+      ctx.quadraticCurveTo(345, 268, 338, 306);
+      ctx.quadraticCurveTo(316, 256, 268, 256);
+      ctx.quadraticCurveTo(214, 268, 166, 302);
+      ctx.quadraticCurveTo(158, 265, 164, 265);
+      ctx.fill();
+
+      // Dad's Gentle Eyebrows
+      ctx.strokeStyle = '#4A3531';
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(198, 290);
+      ctx.quadraticCurveTo(214, 282, 228, 290);
+      ctx.moveTo(276, 290);
+      ctx.quadraticCurveTo(290, 282, 306, 290);
+      ctx.stroke();
+
+      // Dad's Happy Curved Eyes
+      ctx.beginPath();
+      ctx.arc(214, 314, 12, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(290, 314, 12, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.stroke();
+
+      // Dad's Soft Pink Cheeks
+      ctx.fillStyle = 'rgba(244, 91, 137, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(196, 338, 17, 11, 0, 0, Math.PI * 2);
+      ctx.ellipse(308, 338, 17, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dad's Warm Smile
+      ctx.strokeStyle = '#B84A62';
+      ctx.lineWidth = 5.5;
+      ctx.beginPath();
+      ctx.arc(252, 344, 26, 0.14 * Math.PI, 0.86 * Math.PI);
+      ctx.stroke();
+
+      // 3. DAUGHTER CHARACTER (Right-Center, Leaning Happily on Dad)
+      // Daughter's Soft Cream-Pink Dress
+      ctx.fillStyle = '#FFD1DF';
+      ctx.beginPath();
+      ctx.roundRect(355, 515, 225, 215, [95, 95, 0, 0]);
+      ctx.fill();
+
+      // Cute White Peter-Pan Collar
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.ellipse(445, 524, 22, 12, -0.3, 0, Math.PI * 2);
+      ctx.ellipse(492, 524, 22, 12, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Daughter's Neck
+      ctx.fillStyle = '#F7C6A3';
+      ctx.beginPath();
+      ctx.roundRect(448, 475, 40, 48, 18);
+      ctx.fill();
+
+      // Daughter's Cute Pigtails
+      ctx.fillStyle = '#593E39';
+      ctx.beginPath();
+      ctx.arc(395, 378, 34, 0, Math.PI * 2);
+      ctx.arc(542, 378, 34, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pastel Pink Hair Ribbons
+      ctx.fillStyle = '#F45B89';
+      ctx.beginPath();
+      ctx.arc(414, 384, 10, 0, Math.PI * 2);
+      ctx.arc(523, 384, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Daughter's Face
+      ctx.fillStyle = '#FDE2CC';
+      ctx.beginPath();
+      ctx.arc(468, 416, 68, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Daughter's Soft Bangs
+      ctx.fillStyle = '#593E39';
+      ctx.beginPath();
+      ctx.arc(468, 408, 69, Math.PI * 1.04, Math.PI * 1.96);
+      ctx.quadraticCurveTo(492, 392, 468, 396);
+      ctx.quadraticCurveTo(444, 392, 402, 408);
+      ctx.fill();
+
+      // Daughter's Sparkling Eyes
+      ctx.fillStyle = '#3D2B28';
+      ctx.beginPath();
+      ctx.arc(444, 422, 8, 0, Math.PI * 2);
+      ctx.arc(492, 422, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye Highlights
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(441, 419, 3, 0, Math.PI * 2);
+      ctx.arc(489, 419, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Daughter's Rosy Cheeks
+      ctx.fillStyle = 'rgba(244, 91, 137, 0.36)';
+      ctx.beginPath();
+      ctx.ellipse(430, 440, 14, 9, 0, 0, Math.PI * 2);
+      ctx.ellipse(506, 440, 14, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Daughter's Cute Happy Smile
+      ctx.fillStyle = '#F45B89';
+      ctx.beginPath();
+      ctx.arc(468, 442, 16, 0, Math.PI);
+      ctx.fill();
+
+      // Dad's Gentle Arm Hugging Daughter's Shoulder
+      ctx.fillStyle = '#F78DA7';
+      ctx.beginPath();
+      ctx.roundRect(310, 545, 135, 46, 23);
+      ctx.fill();
+
+      // Little Heart Between Them
+      drawCuteHeart(365, 240, 17, '#F45B89', -0.08);
+
+      return c;
+    }
+
+    // Prepare Source Image (Uses CUSTOM_IMAGE_URL if provided, else built-in cute cartoon)
+    let sourceArtworkCanvas = generateFatherDaughterCanvas();
+    cardMiniIllustration.src = sourceArtworkCanvas.toDataURL('image/png');
+
+    if (CUSTOM_IMAGE_URL && CUSTOM_IMAGE_URL.trim() !== '') {
+      const customImg = new Image();
+      customImg.crossOrigin = 'anonymous';
+      customImg.onload = () => {
+        const minSide = Math.min(customImg.width, customImg.height);
+        const sx = (customImg.width - minSide) / 2;
+        const sy = (customImg.height - minSide) / 2;
+        const c = document.createElement('canvas');
+        c.width = 720;
+        c.height = 720;
+        c.getContext('2d').drawImage(customImg, sx, sy, minSide, minSide, 0, 0, 720, 720);
+        sourceArtworkCanvas = c;
+        cardMiniIllustration.src = sourceArtworkCanvas.toDataURL('image/png');
+      };
+      customImg.src = CUSTOM_IMAGE_URL;
+    }
+
+    // =========================================================================
+    // TRUE INTERLOCKING JIGSAW PUZZLE ENGINE (CANVAS BEZIER TABS & SOCKETS)
+    // =========================================================================
+    const GRID = 3;
+    let pieces = [];
+    let hEdges = []; // horizontal internal edges: [row 0..1][col 0..2], +1 or -1
+    let vEdges = []; // vertical internal edges: [row 0..2][col 0..1], +1 or -1
+    let boardRect = { x: 0, y: 0, size: 0, cellSize: 0 };
+    let activePiece = null;
+    let dragOffset = { x: 0, y: 0 };
+    let puzzleCompleted = false;
+    let showCompletedFullImage = false;
+    let puzzleInitialized = false;
+
+    /**
+     * Traces an authentic curved jigsaw piece path for cell (row, col)
+     * centered around (0, 0) where cell spans [-half, +half].
+     */
+    function traceJigsawPiecePath(ctx, row, col, cellSize) {
+      const half = cellSize / 2;
+      const tabSize = cellSize * 0.21;
+
+      // Edge directions: +1 = outward tab (knob), -1 = inward blank (socket), 0 = flat border
+      const topDir    = row === 0        ? 0 : -hEdges[row - 1][col];
+      const rightDir  = col === GRID - 1 ? 0 :  vEdges[row][col];
+      const bottomDir = row === GRID - 1 ? 0 :  hEdges[row][col];
+      const leftDir   = col === 0        ? 0 : -vEdges[row][col - 1];
+
+      ctx.beginPath();
+      ctx.moveTo(-half, -half);
+
+      // 1. TOP EDGE: (-half, -half) -> (+half, -half)
+      drawJigsawEdge(ctx, -half, -half, half, -half, topDir, tabSize);
+
+      // 2. RIGHT EDGE: (+half, -half) -> (+half, +half)
+      drawJigsawEdge(ctx, half, -half, half, half, rightDir, tabSize);
+
+      // 3. BOTTOM EDGE: (+half, +half) -> (-half, +half)
+      drawJigsawEdge(ctx, half, half, -half, half, bottomDir, tabSize);
+
+      // 4. LEFT EDGE: (-half, +half) -> (-half, -half)
+      drawJigsawEdge(ctx, -half, half, -half, -half, leftDir, tabSize);
+
+      ctx.closePath();
+    }
+
+    /**
+     * Draws a single classic curved jigsaw edge with neck & round tab using cubic Bezier curves.
+     */
+    function drawJigsawEdge(ctx, x1, y1, x2, y2, dir, tabSize) {
+      if (dir === 0) {
+        ctx.lineTo(x2, y2);
+        return;
+      }
+
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const len = Math.hypot(dx, dy);
+      // Unit tangent along edge
+      const ux = dx / len;
+      const uy = dy / len;
+      // Outward normal (for clockwise winding: left-hand normal is outward!)
+      const nx = uy * dir;
+      const ny = -ux * dir;
+
+      const p = (t, n) => ({
+        x: x1 + ux * (len * t) + nx * (tabSize * n),
+        y: y1 + uy * (len * t) + ny * (tabSize * n),
+      });
+
+      const p1 = p(0.36, 0);
+      const c1 = p(0.42, 0.05);
+      const c2 = p(0.34, 0.55);
+      const p2 = p(0.37, 0.78);
+
+      const c3 = p(0.40, 1.08);
+      const c4 = p(0.60, 1.08);
+      const p3 = p(0.63, 0.78);
+
+      const c5 = p(0.66, 0.55);
+      const c6 = p(0.58, 0.05);
+      const p4 = p(0.64, 0);
+
+      ctx.lineTo(p1.x, p1.y);
+      ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, p2.x, p2.y);
+      ctx.bezierCurveTo(c3.x, c3.y, c4.x, c4.y, p3.x, p3.y);
+      ctx.bezierCurveTo(c5.x, c5.y, c6.x, c6.y, p4.x, p4.y);
+      ctx.lineTo(x2, y2);
+    }
+
+    function resizeAndLayoutPuzzle() {
+      const rect = puzzleStageArea.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      puzzleCanvas.width = Math.round(rect.width * dpr);
+      puzzleCanvas.height = Math.round(rect.height * dpr);
+
+      const ctx = puzzleCanvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const W = rect.width;
+      const H = rect.height;
+
+      // Board size fits cleanly in top 56% of stage area
+      const boardSize = Math.min(W * 0.78, H * 0.52);
+      const cellSize = boardSize / GRID;
+      const boardX = (W - boardSize) / 2;
+      const boardY = Math.max(10, H * 0.03);
+
+      const prevCell = boardRect.cellSize || cellSize;
+      boardRect = { x: boardX, y: boardY, size: boardSize, cellSize };
+
+      if (!puzzleInitialized) {
+        buildPuzzlePieces(W, H);
+        puzzleInitialized = true;
+      } else {
+        // Re-sync snapped pieces to new board coordinates & clamp floating pieces inside bounds
+        pieces.forEach((p) => {
+          if (p.snapped) {
+            p.x = boardRect.x + (p.col + 0.5) * boardRect.cellSize;
+            p.y = boardRect.y + (p.row + 0.5) * boardRect.cellSize;
+          } else {
+            const pad = cellSize * 0.45;
+            p.x = Math.min(W - pad, Math.max(pad, p.x * (cellSize / prevCell)));
+            p.y = Math.min(H - pad, Math.max(boardY + boardSize + pad, p.y));
+          }
+        });
+      }
+
+      drawPuzzleScene();
+    }
+
+    function buildPuzzlePieces(W, H) {
+      // Randomize interlocking tabs/sockets (+1 or -1)
+      hEdges = Array.from({ length: GRID - 1 }, () =>
+        Array.from({ length: GRID }, () => (Math.random() > 0.5 ? 1 : -1))
+      );
+      vEdges = Array.from({ length: GRID }, () =>
+        Array.from({ length: GRID - 1 }, () => (Math.random() > 0.5 ? 1 : -1))
+      );
+
+      pieces = [];
+      const allCoords = [];
+      for (let r = 0; r < GRID; r++) {
+        for (let c = 0; c < GRID; c++) {
+          allCoords.push({ r, c });
+        }
+      }
+
+      // Shuffle tray order
+      for (let i = allCoords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allCoords[i], allCoords[j]] = [allCoords[j], allCoords[i]];
+      }
+
+      // Arrange 9 shuffled pieces neatly in the bottom tray area (2 rows: 5 + 4)
+      const trayTop = boardRect.y + boardRect.size + boardRect.cellSize * 0.62;
+      const trayBottom = H - boardRect.cellSize * 0.52;
+      const row1Y = trayTop;
+      const row2Y = Math.max(trayTop + boardRect.cellSize * 0.92, (trayTop + trayBottom) * 0.56);
+
+      allCoords.forEach((coord, idx) => {
+        const isFirstRow = idx < 5;
+        const countInRow = isFirstRow ? 5 : 4;
+        const idxInRow = isFirstRow ? idx : idx - 5;
+        const marginX = W * 0.12;
+        const usableW = W - marginX * 2;
+        const x = marginX + (usableW / (countInRow - 1)) * idxInRow;
+        const y = isFirstRow ? row1Y : row2Y;
+
+        pieces.push({
+          row: coord.r,
+          col: coord.c,
+          x,
+          y,
+          scale: 0.78, // Slightly compact in tray, scales up to 1.0 when dragged/snapped
+          snapped: false,
+          snapAnim: 0,
+        });
+      });
+    }
+
+    function drawPuzzleScene() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const W = puzzleCanvas.width / dpr;
+      const H = puzzleCanvas.height / dpr;
+      const ctx = puzzleCanvas.getContext('2d');
+
+      ctx.clearRect(0, 0, W, H);
+
+      const { x: bx, y: by, size: bSize, cellSize } = boardRect;
+
+      // 1. Draw Soft Pastel Board Frame
+      ctx.save();
+      ctx.shadowColor = 'rgba(244, 91, 137, 0.16)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 8;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect(bx - 10, by - 10, bSize + 20, bSize + 20, 26);
+      ctx.fill();
+      ctx.restore();
+
+      // Inner Board Backing
+      ctx.fillStyle = '#FFF5F8';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bSize, bSize, 18);
+      ctx.fill();
+
+      // If completely solved & reveal mode active -> draw seamless full artwork!
+      if (showCompletedFullImage) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bSize, bSize, 18);
+        ctx.clip();
+        ctx.drawImage(sourceArtworkCanvas, bx, by, bSize, bSize);
+        ctx.restore();
+        return;
+      }
+
+      // 2. Draw Subtle Jigsaw Slot Guides inside Board
+      for (let r = 0; r < GRID; r++) {
+        for (let c = 0; c < GRID; c++) {
+          const cx = bx + (c + 0.5) * cellSize;
+          const cy = by + (r + 0.5) * cellSize;
+          ctx.save();
+          ctx.translate(cx, cy);
+          traceJigsawPiecePath(ctx, r, c, cellSize);
+          ctx.strokeStyle = 'rgba(244, 91, 137, 0.22)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // 3. Draw Snapped Pieces First (Bottom Layer), then Unsnapped, then Active Dragged Piece on Top
+      const ordered = [
+        ...pieces.filter((p) => p.snapped),
+        ...pieces.filter((p) => !p.snapped && p !== activePiece),
+        ...(activePiece ? [activePiece] : []),
+      ];
+
+      ordered.forEach((p) => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.scale, p.scale);
+
+        // Soft Drop Shadow for Floating Pieces
+        if (!p.snapped) {
+          ctx.shadowColor = p === activePiece
+            ? 'rgba(244, 91, 137, 0.38)'
+            : 'rgba(244, 91, 137, 0.18)';
+          ctx.shadowBlur = p === activePiece ? 18 : 8;
+          ctx.shadowOffsetY = p === activePiece ? 10 : 4;
+        }
+
+        // Clip to Exact Curved Jigsaw Shape
+        traceJigsawPiecePath(ctx, p.row, p.col, cellSize);
+        ctx.save();
+        ctx.clip();
+
+        // Draw Corresponding Region of Full Artwork (Including Tab Overhangs!)
+        const imgScale = sourceArtworkCanvas.width / bSize;
+        const srcX = p.col * cellSize * imgScale;
+        const srcY = p.row * cellSize * imgScale;
+        const margin = cellSize * 0.35; // Extra margin to cover outward tabs cleanly
+
+        ctx.drawImage(
+          sourceArtworkCanvas,
+          srcX - margin * imgScale,
+          srcY - margin * imgScale,
+          (cellSize + margin * 2) * imgScale,
+          (cellSize + margin * 2) * imgScale,
+    // Pointer Interaction (Unified Pointer Events for Touch & Mouse)
+    let activePointerId = null;
+
+    function getPointerPos(e) {
+      const rect = puzzleCanvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    }
+
+    function onPuzzlePointerDown(e) {
+      if (puzzleCompleted) return;
+      e.preventDefault();
+      const pos = getPointerPos(e);
+      const hitRadius = boardRect.cellSize * 0.60;
+
+      // Search in reverse order so top-most piece is picked first
+      for (let i = pieces.length - 1; i >= 0; i--) {
+        const p = pieces[i];
+        if (p.snapped) continue;
+        const dist = Math.hypot(pos.x - p.x, pos.y - p.y);
+        if (dist <= hitRadius) {
+          activePiece = p;
+          activePointerId = e.pointerId;
+          if (puzzleCanvas.setPointerCapture) {
+            try { puzzleCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+          }
+          activePiece.scale = 1.06; // Pop up while dragging
+          dragOffset.x = pos.x - p.x;
+          dragOffset.y = pos.y - p.y;
+          drawPuzzleScene();
+          break;
+        }
+      }
+    }
+
+    function onPuzzlePointerMove(e) {
+      if (!activePiece || puzzleCompleted) return;
+      if (activePointerId !== null && e.pointerId !== activePointerId) return;
+      e.preventDefault();
+
+      const rect = puzzleCanvas.getBoundingClientRect();
+      const pos = getPointerPos(e);
+      const pad = boardRect.cellSize * 0.38;
+
+      // Clamp position so piece never leaves visible screen bounds
+      activePiece.x = Math.min(rect.width - pad, Math.max(pad, pos.x - dragOffset.x));
+      activePiece.y = Math.min(rect.height - pad, Math.max(pad, pos.y - dragOffset.y));
+
+      // Magnetic Snap Check while Dragging Near Target Slot
+      const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellSize;
+      const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellSize;
+      const dist = Math.hypot(activePiece.x - targetX, activePiece.y - targetY);
+
+      if (dist < boardRect.cellSize * 0.36) {
+        snapPieceIntoSlot(activePiece, targetX, targetY);
+      } else {
+        drawPuzzleScene();
+      }
+    }
+
+    function onPuzzlePointerUp(e) {
+      if (!activePiece || puzzleCompleted) return;
+      if (activePointerId !== null && e.pointerId !== activePointerId) return;
+
+      const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellSize;
+      const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellSize;
+      const dist = Math.hypot(activePiece.x - targetX, activePiece.y - targetY);
+
+      if (dist < boardRect.cellSize * 0.45) {
+        snapPieceIntoSlot(activePiece, targetX, targetY);
+      } else {
+        // Gently return to tray scale if dropped outside
+        activePiece.scale = 0.78;
+        activePiece = null;
+        activePointerId = null;
+        drawPuzzleScene();
+      }
+    }
+
+    function snapPieceIntoSlot(piece, tx, ty) {
+      piece.x = tx;
+      piece.y = ty;
+      piece.scale = 1.0;
+      piece.snapped = true;
+      activePiece = null;
+      activePointerId = null;
+      playCuteSound('snap');
+
+      const snappedCount = pieces.filter((p) => p.snapped).length;
+      puzzleCounter.textContent = `${snappedCount}/9`;
+
+      // Cute sparkle pop at snapped location
+      const pop = document.createElement('span');
+      pop.className = 'mini-pop-heart text-lg';
+      pop.textContent = '🩷';
+      pop.style.left = `${tx - 10}px`;
+      pop.style.top = `${ty - 10}px`;
+      puzzleStageArea.appendChild(pop);
+      setTimeout(() => pop.remove(), 1100);
+
+      drawPuzzleScene();
+      checkAllPiecesSnapped();
+    }
+
+    function checkAllPiecesSnapped() {
+      if (pieces.every((p) => p.snapped)) {
+        puzzleCompleted = true;
+
+        // 1. Seamlessly hide puzzle lines to reveal the full artwork clearly!
+        setTimeout(() => {
+          showCompletedFullImage = true;
+          puzzleHeaderText.textContent = 'รักพ่อที่สุดเลย 🩷';
+          drawPuzzleScene();
+          playCuteSound('chime');
+          burstFallingHearts(32);
+
+          // 2. Pause ~3.0 seconds so Dad can admire the full completed picture unobstructed!
+          setTimeout(() => {
+            switchStage(3);
+          }, 3000);
+        }, 320);
+      }
+    }
+
+    function initJigsawPuzzle() {
+      puzzleCompleted = false;
+      showCompletedFullImage = false;
+      puzzleInitialized = false;
+      activePiece = null;
+      activePointerId = null;
+      puzzleHeaderText.textContent = 'ลากชิ้นส่วนมาต่อให้ครบนะ ✨';
+      puzzleCounter.textContent = '0/9';
+      requestAnimationFrame(() => resizeAndLayoutPuzzle());
+    }
+
+    puzzleCanvas.addEventListener('pointerdown', onPuzzlePointerDown);
+    puzzleCanvas.addEventListener('pointermove', onPuzzlePointerMove);
+    puzzleCanvas.addEventListener('pointerup', onPuzzlePointerUp);
+    puzzleCanvas.addEventListener('pointercancel', onPuzzlePointerUp);
+    window.addEventListener('resize', () => {
+      if (stage2.classList.contains('stage-active')) {
+        resizeAndLayoutPuzzle();
+      }
+    });
+
+
+    // =========================================================================
+    // STEP 3 & 4: WIGGLING ENVELOPE -> OPEN FATHER'S DAY GREETING CARD
+    // =========================================================================
+    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> SLIDING LINED PAPER LETTER
+    // =========================================================================
+    let envelopeOpened = false;
+
+    function openEnvelopeLetter() {
+      if (envelopeOpened) return;
+      envelopeOpened = true;
+
+      playCuteSound('chime');
+      envelopeBox.classList.remove('animate-duk-dik');
+      envelopeBox.classList.add('envelope-opened');
+      tapEnvelopeHint.classList.add('opacity-0', 'pointer-events-none');
+      burstFallingHearts(30);
+
+      setTimeout(() => {
+        letterControls.classList.remove('opacity-0', 'pointer-events-none');
+      }, 950);
+    }
+
+    function closeEnvelopeLetter() {
+      if (!envelopeOpened) return;
+      envelopeOpened = false;
+
+      envelopeBox.classList.remove('envelope-opened');
+      letterControls.classList.add('opacity-0', 'pointer-events-none');
+
+      setTimeout(() => {
+        if (!envelopeOpened) {
+          envelopeBox.classList.add('animate-duk-dik');
+          tapEnvelopeHint.classList.remove('opacity-0', 'pointer-events-none');
+        }
+      }, 850);
+    }
+
+    envelopeBox.addEventListener('click', () => {
+      if (!envelopeOpened) {
+        openEnvelopeLetter();
+      }
+    });
+
+    foldLetterBtn.addEventListener('click', () => {
+      closeEnvelopeLetter();
+    });
+
+    // Subtle Replay Button
+    replayBtn.addEventListener('click', () => {
+      // Reset Step 1
+      isUnlocked = false;
+      isHolding = false;
+      progress = 0;
+      scannerPad.classList.remove('scanning');
+      updateScannerVisuals();
+
+      // Reset Step 3 & 4
+      envelopeOpened = false;
+      envelopeBox.classList.remove('envelope-opened');
+      envelopeBox.classList.add('animate-duk-dik');
+      tapEnvelopeHint.classList.remove('opacity-0', 'pointer-events-none');
+      letterControls.classList.add('opacity-0', 'pointer-events-none');
+
+      switchStage(1);
+    });
+  </script>
+</body>
+</html>
