@@ -145,7 +145,6 @@
       touch-action: manipulation;
     }
 
-    /* Envelope Back Body */
     .env-back {
       position: absolute;
       inset: 0;
@@ -155,7 +154,6 @@
       z-index: 1;
     }
 
-    /* Inner Letter Sheet with Lines */
     .env-letter-sheet {
       position: absolute;
       left: 14px;
@@ -179,12 +177,10 @@
       justify-content: center;
     }
 
-    /* When Envelope Opens, Letter Slides Up Out of Envelope */
     .env-opened .env-letter-sheet {
       transform: translateY(-108px);
     }
 
-    /* Envelope Front Pocket (Left, Right, Bottom Triangles) */
     .env-front-pocket {
       position: absolute;
       inset: 0;
@@ -194,7 +190,6 @@
       overflow: hidden;
     }
 
-    /* Top Triangular Flap */
     .env-top-flap {
       position: absolute;
       top: 0;
@@ -212,7 +207,6 @@
       z-index: 1;
     }
 
-    /* Pure Heart Wax Seal Sticker (No Circle Background) */
     .env-heart-seal {
       position: absolute;
       top: 76px;
@@ -234,7 +228,6 @@
       opacity: 0;
     }
 
-    /* Full Expanded Letter View */
     @keyframes letterExpandIn {
       0% { transform: scale(0.82) translateY(25px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
@@ -249,7 +242,6 @@
       );
     }
 
-    /* Floating Hearts & Sparkles Confetti */
     @keyframes floatUpSparkle {
       0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
       100% { transform: translateY(-130px) scale(1.25) rotate(25deg); opacity: 0; }
@@ -273,7 +265,6 @@
       animation: fallHearts linear forwards;
     }
 
-    /* Stage Transitions */
     .stage-panel {
       transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
@@ -292,7 +283,6 @@
       height: 100%;
     }
 
-    /* Jigsaw Canvas Touch Prevention */
     #puzzle-canvas {
       touch-action: none;
       display: block;
@@ -301,19 +291,24 @@
 </head>
 <body>
 
-  <!-- Background Music (Starts when fingerprint unlock finishes) -->
-  <audio id="bg-music" src="song.mp3" loop preload="auto"></audio>
+  <!-- Background Music (Starts right after fingerprint unlock sound) -->
+  <audio id="bg-music" loop preload="auto" playsinline>
+    <source src="song.mp3" type="audio/mpeg" />
+  </audio>
 
   <!-- Mobile Portrait Shell -->
   <main id="app-shell">
 
-    <!-- Soft Lineless Pastel Background Shapes & Floating Icons -->
+    <button id="music-toggle-btn" type="button" aria-label="เปิดหรือปิดเสียงเพลง"
+            class="hidden absolute top-4 right-4 z-30 w-9 h-9 rounded-full bg-white/85 backdrop-blur-sm text-blush-500 shadow-sm items-center justify-center text-sm transition active:scale-90">
+      🎵
+    </button>
+
     <div class="pointer-events-none absolute inset-0 overflow-hidden z-0">
       <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-blush-200/50 blur-2xl"></div>
       <div class="absolute top-1/3 -right-14 w-52 h-52 rounded-full bg-pink-200/45 blur-2xl"></div>
       <div class="absolute -bottom-14 left-6 w-56 h-56 rounded-full bg-rose-200/50 blur-2xl"></div>
 
-      <!-- Subtle Cute Floating Cartoons -->
       <span class="absolute top-8 left-7 text-xl opacity-65 animate-float-soft">🩷</span>
       <span class="absolute top-14 right-8 text-lg opacity-60 animate-float-soft" style="animation-delay: 1.1s;">✨</span>
       <span class="absolute bottom-12 left-8 text-lg opacity-55 animate-float-soft" style="animation-delay: 2s;">🌸</span>
@@ -325,7 +320,6 @@
     <!-- ========================================================= -->
     <section id="stage-1" class="stage-panel stage-active z-10 flex flex-col justify-between items-center px-6 py-12 text-center">
       
-      <!-- Cute Identity Verification Header -->
       <div class="mt-4 flex flex-col items-center">
         <span class="inline-block px-3.5 py-1 rounded-full bg-white/85 text-blush-400 text-xs font-medium shadow-sm mb-3">
           🔐 พื้นที่ลับเฉพาะคุณพ่อ
@@ -335,20 +329,16 @@
         </h1>
       </div>
 
-      <!-- Centerpiece Pastel Pink Fingerprint Scanner -->
       <div id="scanner-container" class="relative flex flex-col items-center justify-center my-auto">
-        <!-- Soft Pulsing Rings -->
         <div class="absolute w-56 h-56 rounded-full bg-blush-200/50 pulse-aura"></div>
         <div class="absolute w-46 h-46 rounded-full bg-pink-300/35 pulse-aura" style="animation-delay: 0.8s;"></div>
 
-        <!-- Circular Interactive Scanner Pad -->
         <div id="scanner-pad"
              role="button"
              tabindex="0"
              aria-label="สแกนลายนิ้วมือ"
              class="relative w-40 h-40 rounded-full bg-white shadow-[0_14px_35px_rgba(244,91,137,0.22)] flex items-center justify-center cursor-pointer transition-transform duration-200 active:scale-95">
           
-          <!-- Circular SVG Progress Ring -->
           <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="53" fill="none" stroke="#FFE4EC" stroke-width="6.5" />
             <circle id="scan-progress-circle"
@@ -367,10 +357,8 @@
             </defs>
           </svg>
 
-          <!-- Pink Laser Bar -->
           <div class="laser-bar"></div>
 
-          <!-- Cute Fingerprint SVG Icon -->
           <div id="fingerprint-icon" class="relative z-10 text-blush-400 transition-colors duration-300 flex flex-col items-center">
             <svg class="w-20 h-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
@@ -386,7 +374,6 @@
           </div>
         </div>
 
-        <!-- Minimal Prompt Pill -->
         <div class="mt-7">
           <span id="scan-label" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/90 text-blush-500 text-xs font-medium shadow-sm">
             <span>👆</span>
@@ -395,7 +382,6 @@
         </div>
       </div>
 
-      <!-- Bottom Cute Minimal Visual Dots -->
       <div class="flex items-center gap-2 opacity-60">
         <span class="w-2 h-2 rounded-full bg-blush-400"></span>
         <span class="w-2 h-2 rounded-full bg-blush-200"></span>
@@ -409,7 +395,6 @@
     <!-- ========================================================= -->
     <section id="stage-2" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-3 pt-6 pb-4">
       
-      <!-- Minimal Cute Header -->
       <div class="text-center shrink-0">
         <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/85 text-blush-500 text-xs font-medium shadow-sm">
           <span>🧩</span>
@@ -417,12 +402,10 @@
         </span>
       </div>
 
-      <!-- Full Interactive HTML5 Canvas for Real Curved Jigsaw Pieces -->
       <div id="puzzle-stage-area" class="relative w-full flex-1 my-2 flex items-center justify-center">
         <canvas id="puzzle-canvas" class="w-full h-full"></canvas>
       </div>
 
-      <!-- Bottom Progress Dots -->
       <div class="flex items-center gap-2 opacity-60 shrink-0">
         <span class="w-2 h-2 rounded-full bg-blush-200"></span>
         <span class="w-2 h-2 rounded-full bg-blush-400"></span>
@@ -436,47 +419,33 @@
     <!-- ========================================================= -->
     <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-center items-center px-6 py-10 text-center">
       
-      <!-- Center: Wiggling Cute Envelope OR Opened Lined Letter -->
       <div class="relative w-full flex-1 flex items-center justify-center">
         
-        <!-- STEP 3: Realistic 3D Pastel Pink Envelope ("เด้งดุ้กดิ้กๆ") -->
         <div id="envelope-wrapper" class="flex flex-col items-center justify-center env-scene">
           
-          <!-- Minimal Cute Tap Prompt -->
           <div id="envelope-hint" class="mb-6 px-4 py-1.5 rounded-full bg-white/95 shadow-sm text-blush-500 text-xs font-medium animate-bounce">
             💌 มีจดหมายถึงพ่อ แตะเปิดเลย!
           </div>
 
-          <!-- Interactive 3D Envelope Container -->
           <div id="envelope-box" role="button" tabindex="0" aria-label="เปิดซองจดหมาย" class="env-container animate-duk-dik">
-            
-            <!-- 1. Back of Envelope -->
             <div class="env-back"></div>
 
-            <!-- 2. Lined Letter Paper Inside (Slides up when opened) -->
             <div class="env-letter-sheet">
               <div class="text-[14px] font-semibold text-blush-600">ถึง คุณพ่อสุดที่รัก 🩷</div>
               <div class="text-[11px] text-slate-400 mt-1.5">สุขสันต์วันพ่อนะคะ...</div>
             </div>
 
-            <!-- 3. Front Envelope Pocket -->
             <div class="env-front-pocket">
               <svg viewBox="0 0 280 185" class="w-full h-full">
-                <!-- Left Flap -->
                 <polygon points="0,0 145,98 0,185" fill="#FFC4D6" />
-                <!-- Right Flap -->
                 <polygon points="280,0 135,98 280,185" fill="#FFC4D6" />
-                <!-- Bottom Flap -->
                 <polygon points="0,185 140,86 280,185" fill="#FFB0C7" />
-                <!-- Subtle Fold Shadow Line -->
                 <polyline points="0,185 140,86 280,185" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" />
-                <!-- Cute Kawaii Cheeks -->
                 <ellipse cx="46" cy="148" rx="9" ry="5" fill="#F45B89" opacity="0.3" />
                 <ellipse cx="234" cy="148" rx="9" ry="5" fill="#F45B89" opacity="0.3" />
               </svg>
             </div>
 
-            <!-- 4. Top Triangular Flap (Rotates open in 3D) -->
             <div class="env-top-flap">
               <svg viewBox="0 0 280 105" class="w-full h-full overflow-visible">
                 <path d="M 4,0 L 276,0 L 140,100 Z" fill="#FF85A8" />
@@ -484,7 +453,6 @@
               </svg>
             </div>
 
-            <!-- 5. Pure Heart Seal (No Circle) -->
             <div class="env-heart-seal">
               <svg viewBox="0 0 36 32" class="w-11 h-10 overflow-visible">
                 <path d="M18 30 C18 30 2 19.5 2 9.8 C2 4.5 6.2 1 11 1 C14.2 1 16.8 2.8 18 5.2 C19.2 2.8 21.8 1 25 1 C29.8 1 34 4.5 34 9.8 C34 19.5 18 30 18 30 Z"
@@ -494,14 +462,11 @@
                       stroke-linejoin="round" />
               </svg>
             </div>
-
           </div>
         </div>
 
-        <!-- STEP 4: Full Lined Letter Paper Card (Clean: No Photo, No Corner Emojis, No Replay Button) -->
         <div id="greeting-card" class="hidden letter-card-full w-full max-w-[355px] rounded-[28px] shadow-[0_20px_50px_rgba(244,91,137,0.22)] border-4 border-white px-7 py-9 flex-col items-center text-center relative overflow-hidden">
           
-          <!-- Heartfelt Concise Thai Father's Day Letter -->
           <h2 class="text-xl font-semibold text-blush-600 mb-4">
             สุขสันต์วันพ่อนะคะ 🩷
           </h2>
@@ -526,11 +491,54 @@
   </main>
 
   <script>
-    // =========================================================================
-    // CONFIG: ใช้ไฟล์ photo1.jpg สำหรับจิ๊กซอว์ และ song.mp3 สำหรับเพลงพื้นหลัง
-    // =========================================================================
     const PUZZLE_IMAGE_FILE = "photo1.jpg";
     const bgMusic = document.getElementById('bg-music');
+    const musicToggleBtn = document.getElementById('music-toggle-btn');
+
+    // =========================================================================
+    // MOBILE AUDIO UNLOCK & BACKGROUND MUSIC
+    // =========================================================================
+    let musicUnlocked = false;
+    let musicStarted = false;
+
+    function unlockBgMusicOnTouch() {
+      if (musicUnlocked || !bgMusic) return;
+      bgMusic.volume = 0;
+      const p = bgMusic.play();
+      if (p !== undefined) {
+        p.then(() => {
+          if (!isUnlocked) {
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+          }
+          musicUnlocked = true;
+        }).catch(() => {});
+      }
+    }
+
+    function startBgMusicNow() {
+      if (!bgMusic || musicStarted) return;
+      musicStarted = true;
+      bgMusic.muted = false;
+      bgMusic.volume = 0.75;
+      bgMusic.play().then(() => {
+        musicToggleBtn.classList.remove('hidden');
+        musicToggleBtn.classList.add('flex');
+      }).catch(() => {
+        musicStarted = false;
+      });
+    }
+
+    musicToggleBtn.addEventListener('click', () => {
+      if (!bgMusic) return;
+      if (bgMusic.paused) {
+        bgMusic.play();
+        musicToggleBtn.textContent = '🎵';
+      } else {
+        bgMusic.pause();
+        musicToggleBtn.textContent = '🔇';
+      }
+    });
 
     // =========================================================================
     // CUTE SOFT SOUND EFFECTS ENGINE (Web Audio API)
@@ -548,7 +556,7 @@
       return audioCtx;
     }
 
-    function playTone(freq, type = 'sine', duration = 0.14, gainVal = 0.08, delay = 0) {
+    function playTone(freq, type = 'sine', duration = 0.16, gainVal = 0.09, delay = 0) {
       const ctx = getAudioCtx();
       if (!ctx) return;
       const now = ctx.currentTime + delay;
@@ -562,24 +570,22 @@
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
-      osc.stop(now + duration + 0.02);
+      osc.stop(now + duration + 0.03);
     }
 
     const sfx = {
-      scanTick: (prog) => {
-        playTone(420 + prog * 360, 'sine', 0.09, 0.045);
-      },
+      scanTick: (prog) => playTone(420 + prog * 360, 'sine', 0.09, 0.045),
+      // Distinct cute unlock sound right after fingerprint scan completes
       unlockChime: () => {
-        playTone(523.25, 'sine', 0.22, 0.10, 0);     // C5
-        playTone(659.25, 'sine', 0.22, 0.10, 0.10);  // E5
-        playTone(783.99, 'sine', 0.35, 0.12, 0.20);  // G5
+        playTone(587.33, 'sine', 0.18, 0.12, 0.00);     // D5
+        playTone(783.99, 'sine', 0.18, 0.12, 0.09);     // G5
+        playTone(987.77, 'sine', 0.22, 0.13, 0.18);     // B5
+        playTone(1174.66, 'triangle', 0.45, 0.14, 0.28); // D6 sparkle unlock
       },
-      piecePick: () => {
-        playTone(380, 'sine', 0.08, 0.05);
-      },
+      piecePick: () => playTone(380, 'sine', 0.08, 0.05),
       pieceSnap: () => {
-        playTone(587.33, 'sine', 0.14, 0.09, 0);     // D5
-        playTone(880.00, 'sine', 0.18, 0.09, 0.06);  // A5
+        playTone(587.33, 'sine', 0.14, 0.09, 0);
+        playTone(880.00, 'sine', 0.18, 0.09, 0.06);
       },
       puzzleComplete: () => {
         playTone(523.25, 'sine', 0.18, 0.10, 0);
@@ -618,7 +624,6 @@
     const envelopeBox = document.getElementById('envelope-box');
     const greetingCard = document.getElementById('greeting-card');
 
-    // --- Helper: Switch Stages Smoothly ---
     function switchStage(num) {
       [stage1, stage2, stage3].forEach((el, i) => {
         if (i + 1 === num) {
@@ -631,7 +636,6 @@
       });
     }
 
-    // --- Helper: Celebratory Falling Pink Hearts ---
     function burstFallingHearts(count = 26) {
       const icons = ['🩷', '💕', '🌸', '✨', '🤍', '💖'];
       for (let i = 0; i < count; i++) {
@@ -646,7 +650,6 @@
       }
     }
 
-    // --- Helper: Mini Pop Heart Particle while Scanning ---
     function spawnMiniPopHeart(parentEl) {
       const heart = document.createElement('span');
       heart.className = 'mini-pop-heart text-base';
@@ -663,7 +666,7 @@
     // STEP 1: PASTEL PINK FINGERPRINT SCANNER
     // =========================================================================
     const CIRCUMFERENCE = 2 * Math.PI * 53;
-    const HOLD_DURATION = 1750; // 1.75s hold
+    const HOLD_DURATION = 1750;
     let isHolding = false;
     let isUnlocked = false;
     let progress = 0;
@@ -710,19 +713,18 @@
           isHolding = false;
           scannerPad.classList.remove('scanning');
           updateScannerVisuals();
+
+          // Play unlock sound right after scan completes, then start song.mp3
           sfx.unlockChime();
           burstFallingHearts(24);
-
-          // Start playing song.mp3 right when fingerprint unlock completes
-          if (bgMusic) {
-            bgMusic.volume = 0.65;
-            bgMusic.play().catch(() => {});
-          }
+          setTimeout(() => {
+            startBgMusicNow();
+          }, 550);
 
           setTimeout(() => {
             switchStage(2);
             initJigsawPuzzle();
-          }, 850);
+          }, 950);
           return;
         }
         rafId = requestAnimationFrame(stepScan);
@@ -743,6 +745,7 @@
       if (e) e.preventDefault();
       if (isUnlocked) return;
       getAudioCtx();
+      unlockBgMusicOnTouch();
       isHolding = true;
       scannerPad.classList.add('scanning');
       lastTime = null;
@@ -768,61 +771,48 @@
 
 
     // =========================================================================
-    // STEP 2: LOAD photo1.jpg INTO SQUARE CANVAS FOR JIGSAW PUZZLE
+    // STEP 2: ORIGINAL ASPECT RATIO PHOTO (photo1.jpg) FOR JIGSAW PUZZLE
     // =========================================================================
-    function createFallbackCanvas() {
-      const c = document.createElement('canvas');
-      c.width = 720;
-      c.height = 720;
-      const ctx = c.getContext('2d');
-      const bg = ctx.createLinearGradient(0, 0, 0, 720);
-      bg.addColorStop(0, '#FFE4EE');
-      bg.addColorStop(1, '#FFD4E3');
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, 720, 720);
-      ctx.fillStyle = '#F45B89';
-      ctx.font = 'bold 36px Prompt, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('photo1.jpg 🩷', 360, 360);
-      return c;
-    }
-
-    let sourceArtworkCanvas = createFallbackCanvas();
+    let originalPhoto = null;
+    let photoAspect = 1; // width / height of original photo1.jpg
 
     const photoImg = new Image();
     photoImg.onload = () => {
-      const minSide = Math.min(photoImg.width, photoImg.height);
-      const sx = (photoImg.width - minSide) / 2;
-      const sy = (photoImg.height - minSide) / 2;
-      const c = document.createElement('canvas');
-      c.width = 720;
-      c.height = 720;
-      c.getContext('2d').drawImage(photoImg, sx, sy, minSide, minSide, 0, 0, 720, 720);
-      sourceArtworkCanvas = c;
+      originalPhoto = photoImg;
+      if (photoImg.naturalWidth && photoImg.naturalHeight) {
+        photoAspect = photoImg.naturalWidth / photoImg.naturalHeight;
+      }
       if (puzzleInitialized) {
-        drawPuzzleScene();
+        resizeAndLayoutPuzzle();
       }
     };
     photoImg.src = PUZZLE_IMAGE_FILE;
 
 
     // =========================================================================
-    // TRUE INTERLOCKING JIGSAW PUZZLE ENGINE (CANVAS BEZIER TABS & SOCKETS)
+    // TRUE INTERLOCKING JIGSAW PUZZLE ENGINE (MATCHING ORIGINAL PHOTO RATIO)
     // =========================================================================
     const GRID = 3;
     let pieces = [];
     let hEdges = [];
     let vEdges = [];
-    let boardRect = { x: 0, y: 0, size: 0, cellSize: 0 };
+    // boardRect stores width (w) and height (h) matching original photo aspect ratio
+    let boardRect = { x: 0, y: 0, w: 0, h: 0, cellW: 0, cellH: 0 };
     let activePiece = null;
     let dragOffset = { x: 0, y: 0 };
     let puzzleCompleted = false;
     let showCompletedFullImage = false;
     let puzzleInitialized = false;
 
-    function traceJigsawPiecePath(ctx, row, col, cellSize) {
-      const half = cellSize / 2;
-      const tabSize = cellSize * 0.21;
+    /**
+     * Traces an authentic curved jigsaw piece path for cell (row, col)
+     * centered around (0, 0) where cell spans [-halfW, +halfW] x [-halfH, +halfH].
+     */
+    function traceJigsawPiecePath(ctx, row, col, cellW, cellH) {
+      const halfW = cellW / 2;
+      const halfH = cellH / 2;
+      const tabW = cellW * 0.21;
+      const tabH = cellH * 0.21;
 
       const topDir    = row === 0        ? 0 : -hEdges[row - 1][col];
       const rightDir  = col === GRID - 1 ? 0 :  vEdges[row][col];
@@ -830,11 +820,11 @@
       const leftDir   = col === 0        ? 0 : -vEdges[row][col - 1];
 
       ctx.beginPath();
-      ctx.moveTo(-half, -half);
-      drawJigsawEdge(ctx, -half, -half, half, -half, topDir, tabSize);
-      drawJigsawEdge(ctx, half, -half, half, half, rightDir, tabSize);
-      drawJigsawEdge(ctx, half, half, -half, half, bottomDir, tabSize);
-      drawJigsawEdge(ctx, -half, half, -half, -half, leftDir, tabSize);
+      ctx.moveTo(-halfW, -halfH);
+      drawJigsawEdge(ctx, -halfW, -halfH, halfW, -halfH, topDir, tabH);
+      drawJigsawEdge(ctx, halfW, -halfH, halfW, halfH, rightDir, tabW);
+      drawJigsawEdge(ctx, halfW, halfH, -halfW, halfH, bottomDir, tabH);
+      drawJigsawEdge(ctx, -halfW, halfH, -halfW, -halfH, leftDir, tabW);
       ctx.closePath();
     }
 
@@ -877,6 +867,27 @@
       ctx.lineTo(x2, y2);
     }
 
+    function computeBoardDimensions(W, H, aspect) {
+      const maxW = W * 0.84;
+      const maxH = H * 0.54;
+      let boardW = maxW;
+      let boardH = boardW / aspect;
+      if (boardH > maxH) {
+        boardH = maxH;
+        boardW = boardH * aspect;
+      }
+      const boardX = (W - boardW) / 2;
+      const boardY = Math.max(10, H * 0.03);
+      return {
+        x: boardX,
+        y: boardY,
+        w: boardW,
+        h: boardH,
+        cellW: boardW / GRID,
+        cellH: boardH / GRID,
+      };
+    }
+
     function resizeAndLayoutPuzzle() {
       const rect = puzzleStageArea.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -889,13 +900,9 @@
       const W = rect.width;
       const H = rect.height;
 
-      const boardSize = Math.min(W * 0.80, H * 0.54);
-      const cellSize = boardSize / GRID;
-      const boardX = (W - boardSize) / 2;
-      const boardY = Math.max(12, H * 0.04);
-
-      const prevCell = boardRect.cellSize || cellSize;
-      boardRect = { x: boardX, y: boardY, size: boardSize, cellSize };
+      const prevCellW = boardRect.cellW || (W * 0.25);
+      const prevCellH = boardRect.cellH || (W * 0.25);
+      boardRect = computeBoardDimensions(W, H, photoAspect);
 
       if (!puzzleInitialized) {
         buildPuzzlePieces(W, H);
@@ -903,11 +910,11 @@
       } else {
         pieces.forEach((p) => {
           if (p.snapped) {
-            p.x = boardRect.x + (p.col + 0.5) * boardRect.cellSize;
-            p.y = boardRect.y + (p.row + 0.5) * boardRect.cellSize;
+            p.x = boardRect.x + (p.col + 0.5) * boardRect.cellW;
+            p.y = boardRect.y + (p.row + 0.5) * boardRect.cellH;
           } else {
-            p.x = Math.min(W - cellSize * 0.5, Math.max(cellSize * 0.5, p.x * (cellSize / prevCell)));
-            p.y = Math.min(H - cellSize * 0.5, Math.max(boardY + boardSize + cellSize * 0.45, p.y));
+            p.x = Math.min(W - boardRect.cellW * 0.45, Math.max(boardRect.cellW * 0.45, p.x * (boardRect.cellW / prevCellW)));
+            p.y = Math.min(H - boardRect.cellH * 0.45, Math.max(boardRect.y + boardRect.h + boardRect.cellH * 0.45, p.y * (boardRect.cellH / prevCellH)));
           }
         });
       }
@@ -936,10 +943,10 @@
         [allCoords[i], allCoords[j]] = [allCoords[j], allCoords[i]];
       }
 
-      const trayTop = boardRect.y + boardRect.size + boardRect.cellSize * 0.62;
-      const trayBottom = H - boardRect.cellSize * 0.52;
+      const trayTop = boardRect.y + boardRect.h + boardRect.cellH * 0.62;
+      const trayBottom = H - boardRect.cellH * 0.48;
       const row1Y = trayTop;
-      const row2Y = Math.max(trayTop + boardRect.cellSize * 0.92, (trayTop + trayBottom) * 0.56);
+      const row2Y = Math.max(trayTop + boardRect.cellH * 0.95, (trayTop + trayBottom) * 0.56);
 
       allCoords.forEach((coord, idx) => {
         const isFirstRow = idx < 5;
@@ -957,7 +964,6 @@
           y,
           scale: 0.78,
           snapped: false,
-          snapAnim: 0,
         });
       });
     }
@@ -970,40 +976,48 @@
 
       ctx.clearRect(0, 0, W, H);
 
-      const { x: bx, y: by, size: bSize, cellSize } = boardRect;
+      const { x: bx, y: by, w: bW, h: bH, cellW, cellH } = boardRect;
 
+      // Board frame matching original photo aspect ratio
       ctx.save();
       ctx.shadowColor = 'rgba(244, 91, 137, 0.16)';
       ctx.shadowBlur = 24;
       ctx.shadowOffsetY = 8;
       ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
-      ctx.roundRect(bx - 10, by - 10, bSize + 20, bSize + 20, 26);
+      ctx.roundRect(bx - 10, by - 10, bW + 20, bH + 20, 24);
       ctx.fill();
       ctx.restore();
 
       ctx.fillStyle = '#FFF5F8';
       ctx.beginPath();
-      ctx.roundRect(bx, by, bSize, bSize, 18);
+      ctx.roundRect(bx, by, bW, bH, 16);
       ctx.fill();
 
+      // Completed full image reveal without puzzle lines
       if (showCompletedFullImage) {
         ctx.save();
         ctx.beginPath();
-        ctx.roundRect(bx, by, bSize, bSize, 18);
+        ctx.roundRect(bx, by, bW, bH, 16);
         ctx.clip();
-        ctx.drawImage(sourceArtworkCanvas, bx, by, bSize, bSize);
+        if (originalPhoto) {
+          ctx.drawImage(originalPhoto, bx, by, bW, bH);
+        } else {
+          ctx.fillStyle = '#FFE4EE';
+          ctx.fillRect(bx, by, bW, bH);
+        }
         ctx.restore();
         return;
       }
 
+      // Slot guides inside board
       for (let r = 0; r < GRID; r++) {
         for (let c = 0; c < GRID; c++) {
-          const cx = bx + (c + 0.5) * cellSize;
-          const cy = by + (r + 0.5) * cellSize;
+          const cx = bx + (c + 0.5) * cellW;
+          const cy = by + (r + 0.5) * cellH;
           ctx.save();
           ctx.translate(cx, cy);
-          traceJigsawPiecePath(ctx, r, c, cellSize);
+          traceJigsawPiecePath(ctx, r, c, cellW, cellH);
           ctx.strokeStyle = 'rgba(244, 91, 137, 0.22)';
           ctx.lineWidth = 1.5;
           ctx.stroke();
@@ -1030,26 +1044,40 @@
           ctx.shadowOffsetY = p === activePiece ? 10 : 4;
         }
 
-        traceJigsawPiecePath(ctx, p.row, p.col, cellSize);
+        traceJigsawPiecePath(ctx, p.row, p.col, cellW, cellH);
         ctx.save();
         ctx.clip();
 
-        const imgScale = sourceArtworkCanvas.width / bSize;
-        const srcX = p.col * cellSize * imgScale;
-        const srcY = p.row * cellSize * imgScale;
-        const margin = cellSize * 0.35;
+        if (originalPhoto) {
+          const natW = originalPhoto.naturalWidth;
+          const natH = originalPhoto.naturalHeight;
+          const srcCellW = natW / GRID;
+          const srcCellH = natH / GRID;
+          const marginX = cellW * 0.35;
+          const marginY = cellH * 0.35;
+          const srcMarginX = srcCellW * 0.35;
+          const srcMarginY = srcCellH * 0.35;
 
-        ctx.drawImage(
-          sourceArtworkCanvas,
-          srcX - margin * imgScale,
-          srcY - margin * imgScale,
-          (cellSize + margin * 2) * imgScale,
-          (cellSize + margin * 2) * imgScale,
-          -cellSize / 2 - margin,
-          -cellSize / 2 - margin,
-          cellSize + margin * 2,
-          cellSize + margin * 2
-        );
+          const sx = p.col * srcCellW - srcMarginX;
+          const sy = p.row * srcCellH - srcMarginY;
+          const sw = srcCellW + srcMarginX * 2;
+          const sh = srcCellH + srcMarginY * 2;
+
+          ctx.drawImage(
+            originalPhoto,
+            sx,
+            sy,
+            sw,
+            sh,
+            -cellW / 2 - marginX,
+            -cellH / 2 - marginY,
+            cellW + marginX * 2,
+            cellH + marginY * 2
+          );
+        } else {
+          ctx.fillStyle = '#FFD6E2';
+          ctx.fillRect(-cellW, -cellH, cellW * 2, cellH * 2);
+        }
         ctx.restore();
 
         ctx.strokeStyle = p.snapped
@@ -1074,8 +1102,9 @@
 
     function onPuzzlePointerDown(e) {
       if (puzzleCompleted) return;
+      if (isUnlocked && !musicStarted) startBgMusicNow();
       const pos = getPointerPos(e);
-      const hitRadius = boardRect.cellSize * 0.56;
+      const hitRadius = Math.max(boardRect.cellW, boardRect.cellH) * 0.56;
 
       for (let i = pieces.length - 1; i >= 0; i--) {
         const p = pieces[i];
@@ -1100,11 +1129,12 @@
       activePiece.x = pos.x - dragOffset.x;
       activePiece.y = pos.y - dragOffset.y;
 
-      const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellSize;
-      const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellSize;
+      const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellW;
+      const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellH;
       const dist = Math.hypot(activePiece.x - targetX, activePiece.y - targetY);
+      const snapThreshold = Math.min(boardRect.cellW, boardRect.cellH) * 0.34;
 
-      if (dist < boardRect.cellSize * 0.34) {
+      if (dist < snapThreshold) {
         snapPieceIntoSlot(activePiece, targetX, targetY);
       } else {
         drawPuzzleScene();
@@ -1113,11 +1143,12 @@
 
     function onPuzzlePointerUp() {
       if (!activePiece || puzzleCompleted) return;
-      const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellSize;
-      const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellSize;
+      const targetX = boardRect.x + (activePiece.col + 0.5) * boardRect.cellW;
+      const targetY = boardRect.y + (activePiece.row + 0.5) * boardRect.cellH;
       const dist = Math.hypot(activePiece.x - targetX, activePiece.y - targetY);
+      const dropThreshold = Math.min(boardRect.cellW, boardRect.cellH) * 0.42;
 
-      if (dist < boardRect.cellSize * 0.42) {
+      if (dist < dropThreshold) {
         snapPieceIntoSlot(activePiece, targetX, targetY);
       } else {
         activePiece.scale = 0.78;
@@ -1157,7 +1188,6 @@
           sfx.puzzleComplete();
           burstFallingHearts(32);
 
-          // Pause ~2.85s so Dad can admire the completed picture before envelope pops up
           setTimeout(() => {
             switchStage(3);
           }, 2850);
@@ -1196,15 +1226,14 @@
       if (e) e.preventDefault();
       if (envelopeOpened) return;
       envelopeOpened = true;
+      if (isUnlocked && !musicStarted) startBgMusicNow();
 
-      // 1. Stop wiggle, flip flap open & slide letter paper upward out of envelope
       envelopeBox.classList.remove('animate-duk-dik');
       envelopeBox.classList.add('env-opened');
       envelopeHint.style.opacity = '0';
       sfx.envelopeOpen();
       burstFallingHearts(30);
 
-      // 2. Smoothly expand into the full lined letter paper card
       setTimeout(() => {
         envelopeWrapper.classList.add('hidden');
         greetingCard.classList.remove('hidden');
