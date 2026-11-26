@@ -521,132 +521,109 @@
     }
 
     // =========================================================================
-    // CUTE SOUND EFFECTS ENGINE (Await ctx.resume + Cached Buffer + Anti-Dup)
+    // NON-BLOCKING CUTE SOUND EFFECTS ENGINE
     // =========================================================================
     let audioCtx = null;
-    let resumePromise = null;
     let cachedPaperBuffer = null;
-    let lastGestureTs = 0;
 
-    function shouldIgnoreDuplicateGesture(minGapMs = 65) {
-      const now = performance.now();
-      if (now - lastGestureTs < minGapMs) return true;
-      lastGestureTs = now;
-      return false;
-    }
-
-    function createAudioContextIfNeeded() {
+    function getAudioCtx() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
       if (!audioCtx || audioCtx.state === 'closed') {
         audioCtx = new Ctx();
         cachedPaperBuffer = null;
       }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
       return audioCtx;
     }
 
-    function buildPaperBuffer(ctx) {
+    function ensurePaperBuffer(ctx) {
+      if (!ctx) return null;
       if (cachedPaperBuffer && cachedPaperBuffer.sampleRate === ctx.sampleRate) {
         return cachedPaperBuffer;
       }
       const duration = 0.36;
       const frames = Math.max(1, Math.floor(ctx.sampleRate * duration));
       const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
-      const channel = buffer.getChannelData(0);
+      const data = buffer.getChannelData(0);
 
       let prev = 0;
       for (let i = 0; i < frames; i++) {
-        const ratio = i / frames;
-        const env = Math.sin(ratio * Math.PI) * (0.72 + 0.28 * Math.sin(ratio * Math.PI * 6));
+        const t = i / frames;
+        const env = Math.sin(t * Math.PI) * (0.72 + 0.28 * Math.sin(t * Math.PI * 6));
         const white = Math.random() * 2 - 1;
         prev = (prev + 0.32 * white) / 1.32;
-        channel[i] = prev * env;
+        data[i] = prev * env;
       }
       cachedPaperBuffer = buffer;
       return cachedPaperBuffer;
     }
 
-    async function ensureReadyAudioContext() {
-      const ctx = createAudioContextIfNeeded();
-      if (!ctx) return null;
-
-      if (ctx.state === 'suspended') {
-        if (!resumePromise) {
-          resumePromise = ctx.resume().catch(() => {}).finally(() => {
-            resumePromise = null;
-          });
+    function triggerSound(fn) {
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            try { fn(ctx); } catch (_) {}
+          }).catch(() => {});
+        } else {
+          fn(ctx);
         }
-        await resumePromise;
-      }
-
-      if (ctx.state === 'running') {
-        buildPaperBuffer(ctx);
-        try {
-          const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
-          const src = ctx.createBufferSource();
-          src.buffer = buf;
-          src.connect(ctx.destination);
-          src.start(0);
-        } catch (_) {}
-      }
-      return ctx;
+      } catch (_) {}
     }
 
-    // Single lightweight primer on first user gesture
-    window.addEventListener('pointerdown', () => {
-      ensureReadyAudioContext();
-    }, { passive: true });
+    function playCuteNote(freq, duration = 0.16, type = 'sine', volume = 0.24, delay = 0, slideToFreq = null) {
+      triggerSound((ctx) => {
+        const startAt = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-    async function playCuteNote(freq, duration = 0.16, type = 'sine', volume = 0.24, delay = 0, slideToFreq = null) {
-      const ctx = await ensureReadyAudioContext();
-      if (!ctx || ctx.state !== 'running') return;
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, startAt);
+        if (slideToFreq) {
+          osc.frequency.exponentialRampToValueAtTime(slideToFreq, startAt + duration);
+        }
 
-      const startAt = ctx.currentTime + delay;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.linearRampToValueAtTime(volume, startAt + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
 
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, startAt);
-      if (slideToFreq) {
-        osc.frequency.exponentialRampToValueAtTime(slideToFreq, startAt + duration);
-      }
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-      gain.gain.setValueAtTime(0.0001, startAt);
-      gain.gain.linearRampToValueAtTime(volume, startAt + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(startAt);
-      osc.stop(startAt + duration + 0.03);
+        osc.start(startAt);
+        osc.stop(startAt + duration + 0.03);
+      });
     }
 
-    async function playCutePaperSfx(duration = 0.28, volume = 0.28, delay = 0, centerFreq = 1600) {
-      const ctx = await ensureReadyAudioContext();
-      if (!ctx || ctx.state !== 'running') return;
+    function playCutePaperSfx(duration = 0.28, volume = 0.28, delay = 0, centerFreq = 1600) {
+      triggerSound((ctx) => {
+        const buffer = ensurePaperBuffer(ctx);
+        if (!buffer) return;
+        const startAt = ctx.currentTime + delay;
 
-      const buffer = buildPaperBuffer(ctx);
-      const startAt = ctx.currentTime + delay;
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
 
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(centerFreq, startAt);
+        filter.Q.setValueAtTime(0.9, startAt);
 
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(centerFreq, startAt);
-      filter.Q.setValueAtTime(0.9, startAt);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.linearRampToValueAtTime(volume, startAt + duration * 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
 
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.0001, startAt);
-      gain.gain.linearRampToValueAtTime(volume, startAt + duration * 0.2);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
 
-      source.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      source.start(startAt, 0, duration);
+        source.start(startAt, 0, duration);
+      });
     }
 
     const sfx = {
@@ -704,12 +681,11 @@
       }
     }
 
-    musicToggleBtn.addEventListener('click', async () => {
+    musicToggleBtn.addEventListener('click', () => {
       if (!bgMusic) return;
-      await ensureReadyAudioContext();
       sfx.piecePop();
       if (bgMusic.paused) {
-        bgMusic.play();
+        bgMusic.play().catch(() => {});
         musicToggleBtn.textContent = '🎵';
       } else {
         bgMusic.pause();
@@ -936,11 +912,11 @@
       }
     }
 
-    async function beginHold(e) {
+    function beginHold(e) {
       if (e && e.cancelable) e.preventDefault();
-      if (isUnlocked || shouldIgnoreDuplicateGesture()) return;
+      if (isUnlocked) return;
 
-      await ensureReadyAudioContext();
+      getAudioCtx();
       isHolding = true;
       pulseTimer = 0;
       scannerPad.classList.add('scanning');
@@ -965,9 +941,11 @@
       rafId = requestAnimationFrame(stepScan);
     }
 
-    scannerPad.addEventListener('pointerdown', beginHold);
-    window.addEventListener('pointerup', endHold);
-    window.addEventListener('pointercancel', endHold);
+    scannerPad.addEventListener('touchstart', beginHold, { passive: false });
+    scannerPad.addEventListener('mousedown', beginHold);
+    window.addEventListener('touchend', endHold);
+    window.addEventListener('touchcancel', endHold);
+    window.addEventListener('mouseup', endHold);
     scannerPad.addEventListener('contextmenu', (e) => e.preventDefault());
 
 
@@ -1330,15 +1308,17 @@
 
     function getPointerPos(e) {
       const rect = puzzleCanvas.getBoundingClientRect();
+      const clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches.length ? e.touches[0].clientY : e.clientY;
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: clientX - rect.left,
+        y: clientY - rect.top,
       };
     }
 
-    async function onPuzzlePointerDown(e) {
-      if (puzzleCompleted || shouldIgnoreDuplicateGesture(40)) return;
-      await ensureReadyAudioContext();
+    function onPuzzlePointerDown(e) {
+      if (puzzleCompleted) return;
+      getAudioCtx();
       if (isUnlocked && !musicStarted) startBgMusicAutomaticallyOnStage2();
       const pos = getPointerPos(e);
       const hitRadius = Math.max(boardRect.cellW, boardRect.cellH) * 0.56;
@@ -1447,10 +1427,12 @@
       resizeAndLayoutPuzzle();
     }
 
-    puzzleCanvas.addEventListener('pointerdown', onPuzzlePointerDown);
-    window.addEventListener('pointermove', onPuzzlePointerMove, { passive: false });
-    window.addEventListener('pointerup', onPuzzlePointerUp);
-    window.addEventListener('pointercancel', onPuzzlePointerUp);
+    puzzleCanvas.addEventListener('touchstart', onPuzzlePointerDown, { passive: false });
+    puzzleCanvas.addEventListener('mousedown', onPuzzlePointerDown);
+    window.addEventListener('touchmove', onPuzzlePointerMove, { passive: false });
+    window.addEventListener('mousemove', onPuzzlePointerMove, { passive: false });
+    window.addEventListener('touchend', onPuzzlePointerUp);
+    window.addEventListener('mouseup', onPuzzlePointerUp);
     window.addEventListener('resize', () => {
       if (stage2.classList.contains('stage-active')) {
         resizeAndLayoutPuzzle();
@@ -1463,12 +1445,12 @@
     // =========================================================================
     let envelopeOpened = false;
 
-    async function handleOpenEnvelope(e) {
+    function handleOpenEnvelope(e) {
       if (e && e.cancelable) e.preventDefault();
-      if (envelopeOpened || shouldIgnoreDuplicateGesture(80)) return;
+      if (envelopeOpened) return;
       envelopeOpened = true;
 
-      await ensureReadyAudioContext();
+      getAudioCtx();
       if (isUnlocked && !musicStarted) startBgMusicAutomaticallyOnStage2();
 
       envelopeBox.classList.remove('animate-duk-dik');
@@ -1486,7 +1468,8 @@
       }, 950);
     }
 
-    envelopeBox.addEventListener('pointerdown', handleOpenEnvelope);
+    envelopeBox.addEventListener('touchstart', handleOpenEnvelope, { passive: false });
+    envelopeBox.addEventListener('click', handleOpenEnvelope);
   </script>
 </body>
 </html>
