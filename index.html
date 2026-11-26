@@ -154,18 +154,14 @@
       z-index: 1;
     }
 
+    /* Clean Pastel Inner Letter Sheet */
     .env-letter-sheet {
       position: absolute;
       left: 14px;
       right: 14px;
       bottom: 12px;
       height: 158px;
-      background-color: #FFFDF9;
-      background-image: repeating-linear-gradient(
-        transparent,
-        transparent 21px,
-        #FFE4EC 22px
-      );
+      background: linear-gradient(180deg, #FFFDFD 0%, #FFF3F7 100%);
       border-radius: 14px;
       padding: 14px 16px;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
@@ -207,6 +203,7 @@
       z-index: 1;
     }
 
+    /* Pure Heart Seal */
     .env-heart-seal {
       position: absolute;
       top: 76px;
@@ -228,20 +225,40 @@
       opacity: 0;
     }
 
+    /* Clean Cute Pastel Greeting Card */
     @keyframes letterExpandIn {
-      0% { transform: scale(0.82) translateY(25px); opacity: 0; }
+      0% { transform: scale(0.84) translateY(22px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
     }
-    .letter-card-full {
+    .letter-card-pastel {
       animation: letterExpandIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      background-color: #FFFDFB;
-      background-image: repeating-linear-gradient(
-        transparent,
-        transparent 31px,
-        #FFE8EF 32px
-      );
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFF6F9 60%, #FFECF2 100%);
     }
 
+    /* Floating Emojis Rising Up When Letter Opens */
+    @keyframes riseEmojiPop {
+      0% {
+        transform: translateY(20px) translateX(0) scale(0.4) rotate(-10deg);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-10px) translateX(var(--drift-x, 0px)) scale(1.1) rotate(6deg);
+      }
+      100% {
+        transform: translateY(-220px) translateX(var(--drift-x, 0px)) scale(0.95) rotate(16deg);
+        opacity: 0;
+      }
+    }
+    .letter-rising-emoji {
+      position: fixed;
+      bottom: 18%;
+      pointer-events: none;
+      z-index: 95;
+      animation: riseEmojiPop var(--dur, 2.2s) cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+    }
+
+    /* Floating Hearts & Sparkles Confetti */
     @keyframes floatUpSparkle {
       0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
       100% { transform: translateY(-130px) scale(1.25) rotate(25deg); opacity: 0; }
@@ -415,7 +432,7 @@
 
 
     <!-- ========================================================= -->
-    <!-- STEP 3 & 4: REALISTIC CUTE ENVELOPE -> CLEAN LINED LETTER -->
+    <!-- STEP 3 & 4: REALISTIC CUTE ENVELOPE -> PASTEL LETTER       -->
     <!-- ========================================================= -->
     <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-center items-center px-6 py-10 text-center">
       
@@ -432,7 +449,7 @@
 
             <div class="env-letter-sheet">
               <div class="text-[14px] font-semibold text-blush-600">ถึง คุณพ่อสุดที่รัก 🩷</div>
-              <div class="text-[11px] text-slate-400 mt-1.5">สุขสันต์วันพ่อนะคะ...</div>
+              <div class="text-[11px] text-blush-400 mt-1.5">สุขสันต์วันพ่อนะคะ...</div>
             </div>
 
             <div class="env-front-pocket">
@@ -465,20 +482,23 @@
           </div>
         </div>
 
-        <div id="greeting-card" class="hidden letter-card-full w-full max-w-[355px] rounded-[28px] shadow-[0_20px_50px_rgba(244,91,137,0.22)] border-4 border-white px-7 py-9 flex-col items-center text-center relative overflow-hidden">
+        <!-- Clean Cute Pastel Letter Card -->
+        <div id="greeting-card" class="hidden letter-card-pastel w-full max-w-[350px] rounded-[30px] shadow-[0_20px_50px_rgba(244,91,137,0.18)] border-2 border-blush-200/80 px-7 py-9 flex-col items-center text-center relative overflow-hidden">
           
+          <div class="text-2xl mb-2">🩷</div>
+
           <h2 class="text-xl font-semibold text-blush-600 mb-4">
-            สุขสันต์วันพ่อนะคะ 🩷
+            สุขสันต์วันพ่อนะคะ
           </h2>
 
-          <p class="text-slate-600 text-[15px] leading-[32px] font-normal">
+          <p class="text-slate-600 text-[15px] leading-relaxed font-normal space-y-1">
             ขอบคุณพ่อที่คอยดูแล<br/>
             และเป็นกำลังใจให้หนูเสมอมา<br/>
             ขอให้พ่อสุขภาพแข็งแรง มีความสุขมากๆ<br/>
             อยู่เป็นรอยยิ้มของหนูไปนานๆ นะคะ
           </p>
 
-          <div class="mt-6 pt-2 w-full flex flex-col items-end pr-1">
+          <div class="mt-6 pt-3 border-t border-blush-200/60 w-full flex flex-col items-center">
             <span class="text-blush-500 font-medium text-[15px]">
               รักพ่อที่สุดเลย 🥰✨
             </span>
@@ -575,12 +595,11 @@
 
     const sfx = {
       scanTick: (prog) => playTone(420 + prog * 360, 'sine', 0.09, 0.045),
-      // Distinct cute unlock sound right after fingerprint scan completes
       unlockChime: () => {
-        playTone(587.33, 'sine', 0.18, 0.12, 0.00);     // D5
-        playTone(783.99, 'sine', 0.18, 0.12, 0.09);     // G5
-        playTone(987.77, 'sine', 0.22, 0.13, 0.18);     // B5
-        playTone(1174.66, 'triangle', 0.45, 0.14, 0.28); // D6 sparkle unlock
+        playTone(587.33, 'sine', 0.18, 0.12, 0.00);
+        playTone(783.99, 'sine', 0.18, 0.12, 0.09);
+        playTone(987.77, 'sine', 0.22, 0.13, 0.18);
+        playTone(1174.66, 'triangle', 0.45, 0.14, 0.28);
       },
       piecePick: () => playTone(380, 'sine', 0.08, 0.05),
       pieceSnap: () => {
@@ -650,6 +669,22 @@
       }
     }
 
+    // Floating cute emojis rising up when opening the letter
+    function spawnLetterOpenEmojis(count = 22) {
+      const emojis = ['🩷', '🥰', '✨', '🌸', '💕', '🫶', '💖', '🌷'];
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'letter-rising-emoji text-2xl';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = `${12 + Math.random() * 76}%`;
+        el.style.setProperty('--drift-x', `${(Math.random() - 0.5) * 80}px`);
+        el.style.setProperty('--dur', `${1.8 + Math.random() * 1.1}s`);
+        el.style.animationDelay = `${Math.random() * 0.45}s`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+    }
+
     function spawnMiniPopHeart(parentEl) {
       const heart = document.createElement('span');
       heart.className = 'mini-pop-heart text-base';
@@ -714,7 +749,6 @@
           scannerPad.classList.remove('scanning');
           updateScannerVisuals();
 
-          // Play unlock sound right after scan completes, then start song.mp3
           sfx.unlockChime();
           burstFallingHearts(24);
           setTimeout(() => {
@@ -774,7 +808,7 @@
     // STEP 2: ORIGINAL ASPECT RATIO PHOTO (photo1.jpg) FOR JIGSAW PUZZLE
     // =========================================================================
     let originalPhoto = null;
-    let photoAspect = 1; // width / height of original photo1.jpg
+    let photoAspect = 1;
 
     const photoImg = new Image();
     photoImg.onload = () => {
@@ -790,13 +824,16 @@
 
 
     // =========================================================================
-    // TRUE INTERLOCKING JIGSAW PUZZLE ENGINE (MATCHING ORIGINAL PHOTO RATIO)
+    // SEAMLESS INTERLOCKING JIGSAW PUZZLE ENGINE (NO STRETCHING, NO GAPS)
     // =========================================================================
     const GRID = 3;
+    const TAB_RATIO = 0.21;
+    // Max tab tip extends to 1.08 * TAB_RATIO; use 1.15 so clipping never clips a tab tip
+    const CLIP_MARGIN_RATIO = TAB_RATIO * 1.15;
+
     let pieces = [];
     let hEdges = [];
     let vEdges = [];
-    // boardRect stores width (w) and height (h) matching original photo aspect ratio
     let boardRect = { x: 0, y: 0, w: 0, h: 0, cellW: 0, cellH: 0 };
     let activePiece = null;
     let dragOffset = { x: 0, y: 0 };
@@ -804,15 +841,11 @@
     let showCompletedFullImage = false;
     let puzzleInitialized = false;
 
-    /**
-     * Traces an authentic curved jigsaw piece path for cell (row, col)
-     * centered around (0, 0) where cell spans [-halfW, +halfW] x [-halfH, +halfH].
-     */
     function traceJigsawPiecePath(ctx, row, col, cellW, cellH) {
       const halfW = cellW / 2;
       const halfH = cellH / 2;
-      const tabW = cellW * 0.21;
-      const tabH = cellH * 0.21;
+      const tabW = cellW * TAB_RATIO;
+      const tabH = cellH * TAB_RATIO;
 
       const topDir    = row === 0        ? 0 : -hEdges[row - 1][col];
       const rightDir  = col === GRID - 1 ? 0 :  vEdges[row][col];
@@ -978,7 +1011,6 @@
 
       const { x: bx, y: by, w: bW, h: bH, cellW, cellH } = boardRect;
 
-      // Board frame matching original photo aspect ratio
       ctx.save();
       ctx.shadowColor = 'rgba(244, 91, 137, 0.16)';
       ctx.shadowBlur = 24;
@@ -994,7 +1026,6 @@
       ctx.roundRect(bx, by, bW, bH, 16);
       ctx.fill();
 
-      // Completed full image reveal without puzzle lines
       if (showCompletedFullImage) {
         ctx.save();
         ctx.beginPath();
@@ -1002,15 +1033,12 @@
         ctx.clip();
         if (originalPhoto) {
           ctx.drawImage(originalPhoto, bx, by, bW, bH);
-        } else {
-          ctx.fillStyle = '#FFE4EE';
-          ctx.fillRect(bx, by, bW, bH);
         }
         ctx.restore();
         return;
       }
 
-      // Slot guides inside board
+      // Slot guides
       for (let r = 0; r < GRID; r++) {
         for (let c = 0; c < GRID; c++) {
           const cx = bx + (c + 0.5) * cellW;
@@ -1051,39 +1079,38 @@
         if (originalPhoto) {
           const natW = originalPhoto.naturalWidth;
           const natH = originalPhoto.naturalHeight;
-          const srcCellW = natW / GRID;
-          const srcCellH = natH / GRID;
-          const marginX = cellW * 0.35;
-          const marginY = cellH * 0.35;
-          const srcMarginX = srcCellW * 0.35;
-          const srcMarginY = srcCellH * 0.35;
 
-          const sx = p.col * srcCellW - srcMarginX;
-          const sy = p.row * srcCellH - srcMarginY;
-          const sw = srcCellW + srcMarginX * 2;
-          const sh = srcCellH + srcMarginY * 2;
+          // Destination box includes full tab margin so outward tabs fit seamlessly
+          const marginX = cellW * CLIP_MARGIN_RATIO;
+          const marginY = cellH * CLIP_MARGIN_RATIO;
+          const dstX = -cellW / 2 - marginX;
+          const dstY = -cellH / 2 - marginY;
+          const dstW = cellW + marginX * 2;
+          const dstH = cellH + marginY * 2;
 
-          ctx.drawImage(
-            originalPhoto,
-            sx,
-            sy,
-            sw,
-            sh,
-            -cellW / 2 - marginX,
-            -cellH / 2 - marginY,
-            cellW + marginX * 2,
-            cellH + marginY * 2
-          );
+          // Map destination box 1:1 back onto natural image coordinates (no aspect distortion)
+          const scaleX = natW / bW;
+          const scaleY = natH / bH;
+          const pieceBoardLeft = bx + p.col * cellW;
+          const pieceBoardTop = by + p.row * cellH;
+
+          const sx = (pieceBoardLeft - marginX - bx) * scaleX;
+          const sy = (pieceBoardTop - marginY - by) * scaleY;
+          const sw = dstW * scaleX;
+          const sh = dstH * scaleY;
+
+          ctx.drawImage(originalPhoto, sx, sy, sw, sh, dstX, dstY, dstW, dstH);
         } else {
           ctx.fillStyle = '#FFD6E2';
           ctx.fillRect(-cellW, -cellH, cellW * 2, cellH * 2);
         }
         ctx.restore();
 
+        // Crisp hairline border so pieces fit together cleanly
         ctx.strokeStyle = p.snapped
-          ? 'rgba(255, 255, 255, 0.45)'
-          : 'rgba(255, 255, 255, 0.85)';
-        ctx.lineWidth = p.snapped ? 1.2 : 2;
+          ? 'rgba(255, 255, 255, 0.35)'
+          : 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = p.snapped ? 1 : 1.8;
         ctx.stroke();
 
         ctx.restore();
@@ -1112,7 +1139,7 @@
         const dist = Math.hypot(pos.x - p.x, pos.y - p.y);
         if (dist <= hitRadius) {
           activePiece = p;
-          activePiece.scale = 1.04;
+          activePiece.scale = 1.0; // Exact 1.0 scale so snapped pieces align to sub-pixel accuracy
           dragOffset.x = pos.x - p.x;
           dragOffset.y = pos.y - p.y;
           sfx.piecePick();
@@ -1218,7 +1245,7 @@
 
 
     // =========================================================================
-    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> OPEN FATHER'S DAY LINED LETTER
+    // STEP 3 & 4: REALISTIC 3D ENVELOPE -> PASTEL LETTER + RISING EMOJIS
     // =========================================================================
     let envelopeOpened = false;
 
@@ -1232,7 +1259,8 @@
       envelopeBox.classList.add('env-opened');
       envelopeHint.style.opacity = '0';
       sfx.envelopeOpen();
-      burstFallingHearts(30);
+      spawnLetterOpenEmojis(24);
+      burstFallingHearts(24);
 
       setTimeout(() => {
         envelopeWrapper.classList.add('hidden');
