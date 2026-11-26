@@ -176,6 +176,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
 
     /* When Envelope Opens, Letter Slides Up Out of Envelope */
@@ -211,22 +212,20 @@
       z-index: 1;
     }
 
-    /* Heart Wax Seal Sticker */
+    /* Pure Heart Wax Seal Sticker (No Circle Background) */
     .env-heart-seal {
       position: absolute;
       top: 76px;
       left: 50%;
       transform: translateX(-50%);
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      background: #FFFFFF;
-      box-shadow: 0 4px 12px rgba(244, 91, 137, 0.28);
+      width: 48px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 5;
       pointer-events: none;
+      filter: drop-shadow(0 4px 10px rgba(244, 91, 137, 0.35));
       transition: transform 0.35s ease, opacity 0.3s ease;
     }
 
@@ -302,6 +301,9 @@
 </head>
 <body>
 
+  <!-- Background Music (Starts when fingerprint unlock finishes) -->
+  <audio id="bg-music" src="song.mp3" loop preload="auto"></audio>
+
   <!-- Mobile Portrait Shell -->
   <main id="app-shell">
 
@@ -319,7 +321,7 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- STEP 1: CUTE FINGERPRINT SCANNER (NO CROWN)               -->
+    <!-- STEP 1: CUTE FINGERPRINT SCANNER                          -->
     <!-- ========================================================= -->
     <section id="stage-1" class="stage-panel stage-active z-10 flex flex-col justify-between items-center px-6 py-12 text-center">
       
@@ -403,7 +405,7 @@
 
 
     <!-- ========================================================= -->
-    <!-- STEP 2: REAL INTERLOCKING JIGSAW PUZZLE (3x3)             -->
+    <!-- STEP 2: REAL INTERLOCKING JIGSAW PUZZLE (3x3 - photo1.jpg)-->
     <!-- ========================================================= -->
     <section id="stage-2" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-3 pt-6 pb-4">
       
@@ -430,12 +432,10 @@
 
 
     <!-- ========================================================= -->
-    <!-- STEP 3 & 4: REALISTIC CUTE ENVELOPE -> LINED LETTER CARD  -->
+    <!-- STEP 3 & 4: REALISTIC CUTE ENVELOPE -> CLEAN LINED LETTER -->
     <!-- ========================================================= -->
-    <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-between items-center px-6 py-10 text-center">
+    <section id="stage-3" class="stage-panel stage-hidden z-10 flex flex-col justify-center items-center px-6 py-10 text-center">
       
-      <div class="h-4"></div>
-
       <!-- Center: Wiggling Cute Envelope OR Opened Lined Letter -->
       <div class="relative w-full flex-1 flex items-center justify-center">
         
@@ -455,14 +455,11 @@
 
             <!-- 2. Lined Letter Paper Inside (Slides up when opened) -->
             <div class="env-letter-sheet">
-              <div class="w-10 h-10 rounded-full bg-blush-100 flex items-center justify-center text-lg mb-1.5">
-                🩷
-              </div>
-              <div class="text-[13px] font-semibold text-blush-600">ถึง คุณพ่อสุดที่รัก</div>
-              <div class="text-[11px] text-slate-400 mt-1">สุขสันต์วันพ่อนะคะ...</div>
+              <div class="text-[14px] font-semibold text-blush-600">ถึง คุณพ่อสุดที่รัก 🩷</div>
+              <div class="text-[11px] text-slate-400 mt-1.5">สุขสันต์วันพ่อนะคะ...</div>
             </div>
 
-            <!-- 3. Front Envelope Pocket (Left, Right, Bottom Flaps + Cute Stamp) -->
+            <!-- 3. Front Envelope Pocket -->
             <div class="env-front-pocket">
               <svg viewBox="0 0 280 185" class="w-full h-full">
                 <!-- Left Flap -->
@@ -487,34 +484,25 @@
               </svg>
             </div>
 
-            <!-- 5. Heart Wax Seal Sticker -->
+            <!-- 5. Pure Heart Seal (No Circle) -->
             <div class="env-heart-seal">
-              <span class="text-xl leading-none">🩷</span>
+              <svg viewBox="0 0 36 32" class="w-11 h-10 overflow-visible">
+                <path d="M18 30 C18 30 2 19.5 2 9.8 C2 4.5 6.2 1 11 1 C14.2 1 16.8 2.8 18 5.2 C19.2 2.8 21.8 1 25 1 C29.8 1 34 4.5 34 9.8 C34 19.5 18 30 18 30 Z"
+                      fill="#FF477E"
+                      stroke="#FFFFFF"
+                      stroke-width="2.5"
+                      stroke-linejoin="round" />
+              </svg>
             </div>
 
           </div>
         </div>
 
-        <!-- STEP 4: Full Lined Letter Paper Card -->
-        <div id="greeting-card" class="hidden letter-card-full w-full max-w-[355px] rounded-[28px] shadow-[0_20px_50px_rgba(244,91,137,0.22)] border-4 border-white p-6 flex-col items-center text-center relative overflow-hidden">
+        <!-- STEP 4: Full Lined Letter Paper Card (Clean: No Photo, No Corner Emojis, No Replay Button) -->
+        <div id="greeting-card" class="hidden letter-card-full w-full max-w-[355px] rounded-[28px] shadow-[0_20px_50px_rgba(244,91,137,0.22)] border-4 border-white px-7 py-9 flex-col items-center text-center relative overflow-hidden">
           
-          <!-- Cute Mini Stamp & Postmark Top Right -->
-          <div class="w-full flex justify-between items-center mb-2">
-            <span class="text-[11px] font-medium text-blush-400 bg-blush-50 px-2.5 py-0.5 rounded-full">
-              📅 5 ธันวาคม
-            </span>
-            <div class="w-9 h-10 rounded-md bg-blush-100 border border-dashed border-blush-300 flex items-center justify-center text-sm rotate-3">
-              💌
-            </div>
-          </div>
-
-          <!-- Circular Mini Illustration Thumbnail -->
-          <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-blush-300 to-pink-100 shadow-md mb-3">
-            <img id="card-mini-illustration" src="" alt="พ่อกับลูก" class="w-full h-full rounded-full object-cover" />
-          </div>
-
           <!-- Heartfelt Concise Thai Father's Day Letter -->
-          <h2 class="text-xl font-semibold text-blush-600 mb-3">
+          <h2 class="text-xl font-semibold text-blush-600 mb-4">
             สุขสันต์วันพ่อนะคะ 🩷
           </h2>
 
@@ -525,7 +513,7 @@
             อยู่เป็นรอยยิ้มของหนูไปนานๆ นะคะ
           </p>
 
-          <div class="mt-4 pt-3 w-full flex flex-col items-end pr-2">
+          <div class="mt-6 pt-2 w-full flex flex-col items-end pr-1">
             <span class="text-blush-500 font-medium text-[15px]">
               รักพ่อที่สุดเลย 🥰✨
             </span>
@@ -533,32 +521,19 @@
         </div>
 
       </div>
-
-      <!-- Subtle Minimal Replay Icon Button at Bottom (Only shown on Step 4) -->
-      <div class="h-10 flex items-center justify-center">
-        <button id="replay-btn" type="button" aria-label="เล่นอีกครั้ง"
-                class="hidden w-9 h-9 rounded-full bg-white/85 hover:bg-white text-blush-400 shadow-sm items-center justify-center transition active:scale-90">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-          </svg>
-        </button>
-      </div>
     </section>
 
   </main>
 
   <script>
-    /**
-     * =========================================================================
-     * OPTIONAL: ใส่ลิงก์รูปภาพคู่ของคุณกับคุณพ่อตรงนี้ได้ (ถ้าเว้นว่างไว้จะใช้ภาพการ์ตูนน่ารักอัตโนมัติ)
-     * Example: const CUSTOM_IMAGE_URL = "https://example.com/dad-and-me.jpg";
-     * =========================================================================
-     */
-    const CUSTOM_IMAGE_URL = "";
+    // =========================================================================
+    // CONFIG: ใช้ไฟล์ photo1.jpg สำหรับจิ๊กซอว์ และ song.mp3 สำหรับเพลงพื้นหลัง
+    // =========================================================================
+    const PUZZLE_IMAGE_FILE = "photo1.jpg";
+    const bgMusic = document.getElementById('bg-music');
 
     // =========================================================================
-    // CUTE SOFT SOUND EFFECTS ENGINE (Web Audio API - No External MP3 Needed)
+    // CUTE SOFT SOUND EFFECTS ENGINE (Web Audio API)
     // =========================================================================
     let audioCtx = null;
 
@@ -642,8 +617,6 @@
     const envelopeHint = document.getElementById('envelope-hint');
     const envelopeBox = document.getElementById('envelope-box');
     const greetingCard = document.getElementById('greeting-card');
-    const cardMiniIllustration = document.getElementById('card-mini-illustration');
-    const replayBtn = document.getElementById('replay-btn');
 
     // --- Helper: Switch Stages Smoothly ---
     function switchStage(num) {
@@ -740,6 +713,12 @@
           sfx.unlockChime();
           burstFallingHearts(24);
 
+          // Start playing song.mp3 right when fingerprint unlock completes
+          if (bgMusic) {
+            bgMusic.volume = 0.65;
+            bgMusic.play().catch(() => {});
+          }
+
           setTimeout(() => {
             switchStage(2);
             initJigsawPuzzle();
@@ -789,219 +768,43 @@
 
 
     // =========================================================================
-    // STEP 2: LINELESS 2D FATHER & DAUGHTER ILLUSTRATION + REAL CURVED JIGSAW
+    // STEP 2: LOAD photo1.jpg INTO SQUARE CANVAS FOR JIGSAW PUZZLE
     // =========================================================================
-    function generateFatherDaughterCanvas() {
+    function createFallbackCanvas() {
       const c = document.createElement('canvas');
       c.width = 720;
       c.height = 720;
       const ctx = c.getContext('2d');
-
       const bg = ctx.createLinearGradient(0, 0, 0, 720);
       bg.addColorStop(0, '#FFE4EE');
-      bg.addColorStop(0.55, '#FFF5F8');
       bg.addColorStop(1, '#FFD4E3');
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, 720, 720);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
-      ctx.beginPath();
-      ctx.arc(360, 340, 255, 0, Math.PI * 2);
-      ctx.fill();
-
-      function drawCuteHeart(x, y, r, color, rot = 0) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(rot);
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(0, r * 0.35);
-        ctx.bezierCurveTo(0, 0, -r, 0, -r, r * 0.65);
-        ctx.bezierCurveTo(-r, r * 1.25, 0, r * 1.6, 0, r * 1.9);
-        ctx.bezierCurveTo(0, r * 1.6, r, r * 1.25, r, r * 0.65);
-        ctx.bezierCurveTo(r, 0, 0, 0, 0, r * 0.35);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      drawCuteHeart(135, 165, 20, '#FF9EB9', -0.2);
-      drawCuteHeart(575, 145, 22, '#FFB3C8', 0.25);
-      drawCuteHeart(355, 105, 18, '#F45B89', 0);
-      drawCuteHeart(595, 310, 15, '#FFD1DF', 0.15);
-      drawCuteHeart(115, 330, 15, '#FFC2D4', -0.15);
-
-      function drawSparkle(cx, cy, size, color) {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - size);
-        ctx.quadraticCurveTo(cx, cy, cx + size, cy);
-        ctx.quadraticCurveTo(cx, cy, cx, cy + size);
-        ctx.quadraticCurveTo(cx, cy, cx - size, cy);
-        ctx.quadraticCurveTo(cx, cy, cx, cy - size);
-        ctx.fill();
-      }
-      drawSparkle(210, 120, 14, '#FF85A8');
-      drawSparkle(500, 195, 12, '#FBBF24');
-      drawSparkle(150, 260, 10, '#F45B89');
-
-      // Father
-      ctx.fillStyle = '#F78DA7';
-      ctx.beginPath();
-      ctx.roundRect(110, 445, 285, 285, [125, 125, 0, 0]);
-      ctx.fill();
-
-      ctx.fillStyle = '#FFF7F9';
-      ctx.beginPath();
-      ctx.arc(252, 452, 42, 0, Math.PI);
-      ctx.fill();
-
-      ctx.fillStyle = '#F7C6A3';
-      ctx.beginPath();
-      ctx.roundRect(226, 392, 52, 68, 24);
-      ctx.fill();
-
-      ctx.fillStyle = '#F3B78E';
-      ctx.beginPath();
-      ctx.arc(164, 318, 19, 0, Math.PI * 2);
-      ctx.arc(340, 318, 19, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#FAD2B4';
-      ctx.beginPath();
-      ctx.roundRect(168, 222, 168, 185, 82);
-      ctx.fill();
-
-      ctx.fillStyle = '#4A3531';
-      ctx.beginPath();
-      ctx.arc(252, 265, 88, Math.PI, Math.PI * 2);
-      ctx.quadraticCurveTo(345, 268, 338, 306);
-      ctx.quadraticCurveTo(316, 256, 268, 256);
-      ctx.quadraticCurveTo(214, 268, 166, 302);
-      ctx.quadraticCurveTo(158, 265, 164, 265);
-      ctx.fill();
-
-      ctx.strokeStyle = '#4A3531';
-      ctx.lineWidth = 5.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(198, 290);
-      ctx.quadraticCurveTo(214, 282, 228, 290);
-      ctx.moveTo(276, 290);
-      ctx.quadraticCurveTo(290, 282, 306, 290);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(214, 314, 12, Math.PI * 1.1, Math.PI * 1.9);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(290, 314, 12, Math.PI * 1.1, Math.PI * 1.9);
-      ctx.stroke();
-
-      ctx.fillStyle = 'rgba(244, 91, 137, 0.28)';
-      ctx.beginPath();
-      ctx.ellipse(196, 338, 17, 11, 0, 0, Math.PI * 2);
-      ctx.ellipse(308, 338, 17, 11, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = '#B84A62';
-      ctx.lineWidth = 5.5;
-      ctx.beginPath();
-      ctx.arc(252, 344, 26, 0.14 * Math.PI, 0.86 * Math.PI);
-      ctx.stroke();
-
-      // Daughter
-      ctx.fillStyle = '#FFD1DF';
-      ctx.beginPath();
-      ctx.roundRect(355, 515, 225, 215, [95, 95, 0, 0]);
-      ctx.fill();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.ellipse(445, 524, 22, 12, -0.3, 0, Math.PI * 2);
-      ctx.ellipse(492, 524, 22, 12, 0.3, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#F7C6A3';
-      ctx.beginPath();
-      ctx.roundRect(448, 475, 40, 48, 18);
-      ctx.fill();
-
-      ctx.fillStyle = '#593E39';
-      ctx.beginPath();
-      ctx.arc(395, 378, 34, 0, Math.PI * 2);
-      ctx.arc(542, 378, 34, 0, Math.PI * 2);
-      ctx.fill();
-
       ctx.fillStyle = '#F45B89';
-      ctx.beginPath();
-      ctx.arc(414, 384, 10, 0, Math.PI * 2);
-      ctx.arc(523, 384, 10, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#FDE2CC';
-      ctx.beginPath();
-      ctx.arc(468, 416, 68, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#593E39';
-      ctx.beginPath();
-      ctx.arc(468, 408, 69, Math.PI * 1.04, Math.PI * 1.96);
-      ctx.quadraticCurveTo(492, 392, 468, 396);
-      ctx.quadraticCurveTo(444, 392, 402, 408);
-      ctx.fill();
-
-      ctx.fillStyle = '#3D2B28';
-      ctx.beginPath();
-      ctx.arc(444, 422, 8, 0, Math.PI * 2);
-      ctx.arc(492, 422, 8, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(441, 419, 3, 0, Math.PI * 2);
-      ctx.arc(489, 419, 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(244, 91, 137, 0.36)';
-      ctx.beginPath();
-      ctx.ellipse(430, 440, 14, 9, 0, 0, Math.PI * 2);
-      ctx.ellipse(506, 440, 14, 9, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#F45B89';
-      ctx.beginPath();
-      ctx.arc(468, 442, 16, 0, Math.PI);
-      ctx.fill();
-
-      ctx.fillStyle = '#F78DA7';
-      ctx.beginPath();
-      ctx.roundRect(310, 545, 135, 46, 23);
-      ctx.fill();
-
-      drawCuteHeart(365, 240, 17, '#F45B89', -0.08);
-
+      ctx.font = 'bold 36px Prompt, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('photo1.jpg 🩷', 360, 360);
       return c;
     }
 
-    let sourceArtworkCanvas = generateFatherDaughterCanvas();
-    cardMiniIllustration.src = sourceArtworkCanvas.toDataURL('image/png');
+    let sourceArtworkCanvas = createFallbackCanvas();
 
-    if (CUSTOM_IMAGE_URL && CUSTOM_IMAGE_URL.trim() !== '') {
-      const customImg = new Image();
-      customImg.crossOrigin = 'anonymous';
-      customImg.onload = () => {
-        const minSide = Math.min(customImg.width, customImg.height);
-        const sx = (customImg.width - minSide) / 2;
-        const sy = (customImg.height - minSide) / 2;
-        const c = document.createElement('canvas');
-        c.width = 720;
-        c.height = 720;
-        c.getContext('2d').drawImage(customImg, sx, sy, minSide, minSide, 0, 0, 720, 720);
-        sourceArtworkCanvas = c;
-        cardMiniIllustration.src = sourceArtworkCanvas.toDataURL('image/png');
-      };
-      customImg.src = CUSTOM_IMAGE_URL;
-    }
+    const photoImg = new Image();
+    photoImg.onload = () => {
+      const minSide = Math.min(photoImg.width, photoImg.height);
+      const sx = (photoImg.width - minSide) / 2;
+      const sy = (photoImg.height - minSide) / 2;
+      const c = document.createElement('canvas');
+      c.width = 720;
+      c.height = 720;
+      c.getContext('2d').drawImage(photoImg, sx, sy, minSide, minSide, 0, 0, 720, 720);
+      sourceArtworkCanvas = c;
+      if (puzzleInitialized) {
+        drawPuzzleScene();
+      }
+    };
+    photoImg.src = PUZZLE_IMAGE_FILE;
+
 
     // =========================================================================
     // TRUE INTERLOCKING JIGSAW PUZZLE ENGINE (CANVAS BEZIER TABS & SOCKETS)
@@ -1406,36 +1209,11 @@
         envelopeWrapper.classList.add('hidden');
         greetingCard.classList.remove('hidden');
         greetingCard.classList.add('flex');
-        replayBtn.classList.remove('hidden');
-        replayBtn.classList.add('flex');
       }, 950);
     }
 
     envelopeBox.addEventListener('pointerup', handleOpenEnvelope);
     envelopeBox.addEventListener('click', handleOpenEnvelope);
-
-    // Subtle Replay Button
-    replayBtn.addEventListener('click', () => {
-      // Reset Step 1
-      isUnlocked = false;
-      isHolding = false;
-      progress = 0;
-      scannerPad.classList.remove('scanning');
-      updateScannerVisuals();
-
-      // Reset Step 3 & 4
-      envelopeOpened = false;
-      envelopeBox.classList.remove('env-opened');
-      envelopeBox.classList.add('animate-duk-dik');
-      envelopeHint.style.opacity = '1';
-      envelopeWrapper.classList.remove('hidden');
-      greetingCard.classList.add('hidden');
-      greetingCard.classList.remove('flex');
-      replayBtn.classList.add('hidden');
-      replayBtn.classList.remove('flex');
-
-      switchStage(1);
-    });
   </script>
 </body>
 </html>
